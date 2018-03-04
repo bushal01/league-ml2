@@ -14,14 +14,10 @@ Data constants and setup
 import pandas as pd
 import json
 import requests
-import match_crawler as mc
 import time
 #import os
 
-#SCRIPTS_DIR = 'C:\\Users\\Albert\\Desktop\\Programming\\league-ml2\\src\\data-mining\\'
-SCRIPTS_DIR = ''
-DATA_DIR = '../../data/mined-data/'
-#DATA_DIR = 'C:\\Users\\Albert\\Desktop\\Programming\\league-ml2\\data\\mined-data\\'
+DATA_DIR = '../../data/mined_data/'
 API_KEY_FILE = '../../data/api_key.txt'
 
 def getApiKey():
@@ -119,11 +115,23 @@ def getHeal():
 def getBarrier():
     return(21)
 
+def checkRateLimiting(request):
+    '''print(request)'''
+    if 'status' in request.keys():
+        if request['status']['status_code'] == 429:
+            print('Rate limited')
+            return(True)
+        else:
+            print(request['status'])
+            return(False)
+    else:
+        return(False)
+
 def updateChampList(region = 'na1'):
     print('Updating Champ List')
-    url = 'https://' + region + '.api.riotgames.com/lol/static-data/v3/champions/' + '?api_key=' + API_KEY
+    url = 'https://' + region + '.api.riotgames.com/lol/static-data/v3/champions/' + '?api_key=' + getApiKey()
     r = requests.get(url)
-    if mc.checkRateLimiting(r.json()):
+    if checkRateLimiting(r.json()):
         time.sleep(120)
         r = requests.get(url)
     with open(DATA_DIR + 'champions.json', 'w') as outfile:

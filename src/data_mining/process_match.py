@@ -12,11 +12,7 @@ in preparation for Machine Learning applications
 
 """
 import pandas as pd
-import os
-import json
 import data_constants as dc
-
-#os.chdir('C:\\Users\\Albert\\Desktop\\Programming\\LEAGUE_ML_PROJECT')
 
 def isExtractableMatch(unprocessed_match):
     necessary_keys = ['gameId','queueId','gameVersion','gameDuration','participants']

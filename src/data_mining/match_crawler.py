@@ -50,7 +50,7 @@ def pullMatchHistory(player_id, region = 'na1'):
     print('Pulling match history for player ' + str(player_id))
     url = 'https://' + region + '.api.riotgames.com/lol/match/v3/matchlists/by-account/' + str(player_id) + '?api_key=' + dc.getApiKey()
     r = requests.get(url)
-    if checkRateLimiting(r.json()):
+    if dc.checkRateLimiting(r.json()):
         time.sleep(120)
         r = requests.get(url)
     return(r.json())
@@ -59,23 +59,10 @@ def pullMatchData(match_id, region = 'na1'):
     print('Pulling match ' + str(match_id))
     url = 'https://' + region + '.api.riotgames.com/lol/match/v3/matches/' + str(match_id) + '?api_key=' + dc.getApiKey()
     r = requests.get(url)
-    if checkRateLimiting(r.json()):
+    if dc.checkRateLimiting(r.json()):
         time.sleep(120)
         r = requests.get(url)
-    return(r.json())
-
-def checkRateLimiting(request):
-    '''print(request)'''
-    if 'status' in request.keys():
-        if request['status']['status_code'] == 429:
-            print('Rate limited')
-            return(True)
-        else:
-            print(request['status'])
-            return(False)
-    else:
-        return(False)
-    
+    return(r.json())    
 
 def scanPlayer(player_id, scanned, unscanned):
     cpid = ''

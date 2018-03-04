@@ -14,9 +14,6 @@ import data_constants as dc
 import process_match as pm
 import match_crawler as mc
 import importlib
-import datetime
-import requests
-import time
 importlib.reload(dc)
 importlib.reload(pm)
 importlib.reload(mc)
@@ -34,6 +31,9 @@ while loop
     - repeat
 """
 MAX_UNSCANNED_PLAYERS = 10000000
+OUTPUT_FILE = 'new_processed_matches.csv'
+num_matches_to_pull = 5000
+
 # Load seed data and convert to a DataFrame
 
 with open(dc.DATA_DIR + 'matches1.json', 'r') as f:
@@ -55,7 +55,6 @@ match_dfs = []
 # Scan all unscanned players and extract their matches
 # ** Still need to do a 'season' filter so I don't pull too old matches **
 # Desired number of matches to pull
-num_matches_to_pull = 25000
 matches_pulled_ctr = 0
 while(matches_pulled_ctr < num_matches_to_pull):
     unscanned_playerids = list(unscanned_players.keys())
@@ -72,9 +71,10 @@ while(matches_pulled_ctr < num_matches_to_pull):
             mc.extractPlayers(raw_match_data,scanned_players,unscanned_players)
         print(len(unscanned_players))
         # scan all the new matches
-        processed_match_df = pm.build_processed_match_df(raw_match_data)
-        matches_pulled_ctr = matches_pulled_ctr + processed_match_df.shape[0]
-        match_dfs.append(processed_match_df)
+        if raw_match_data.shape[0] != 0:
+            processed_match_df = pm.build_processed_match_df(raw_match_data)
+            matches_pulled_ctr = matches_pulled_ctr + processed_match_df.shape[0]
+            match_dfs.append(processed_match_df)
         print('Number of players scanned ' + str(len(scanned_players)))
         print('Number of matches pulled ' + str(matches_pulled_ctr))
         if(matches_pulled_ctr >= num_matches_to_pull):
@@ -88,10 +88,10 @@ int_cols = ['queue_id','game_duration','team_100_win']
 compiled_pm_dfs[int_cols] = compiled_pm_dfs[int_cols].astype(int)
 int64_cols = ['match_id']
 compiled_pm_dfs[int64_cols] = compiled_pm_dfs[int64_cols].astype(np.int64)
-if os.path.exists(dc.DATA_DIR + 'compiled_pm_dfs_test15.csv'):
-    compiled_pm_dfs.to_csv(dc.DATA_DIR + 'compiled_pm_dfs_test15.csv', index = False, mode = 'a', header = False)
+if os.path.exists(dc.DATA_DIR + OUTPUT_FILE):
+    compiled_pm_dfs.to_csv(dc.DATA_DIR + OUTPUT_FILE, index = False, mode = 'a', header = False)
 else:
-    compiled_pm_dfs.to_csv(dc.DATA_DIR + 'compiled_pm_dfs_test15.csv', index = False)
+    compiled_pm_dfs.to_csv(dc.DATA_DIR + OUTPUT_FILE, index = False)
 
 mc.dictToCsv(scanned_players, dc.DATA_DIR + 'scanned_players.csv')
 mc.dictToCsv(unscanned_players, dc.DATA_DIR + 'unscanned_players.csv')
