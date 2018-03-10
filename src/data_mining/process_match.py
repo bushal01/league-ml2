@@ -197,6 +197,8 @@ def processValidTeamComp(match):
                        'team_100_win':[match['team_100_win']]}
     for i in match['participants']:
         match_col = str(match['participants'][i]['teamId']) + '_' + str(match['participants'][i]['lane']) + '_' + str(match['participants'][i]['role'])
+        if match['participants'][i]['championId'] not in champ_dict.keys():
+            dc.updateChampList()
         processed_match[match_col] = [champ_dict[match['participants'][i]['championId']][0:4]]
         #processed_match.append(str(match['participants'][i]['teamId']) + '_' + 
         #                       str(match['participants'][i]['lane']) + '_' + 

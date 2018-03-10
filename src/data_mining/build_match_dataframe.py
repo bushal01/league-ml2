@@ -31,8 +31,8 @@ while loop
     - repeat
 """
 MAX_UNSCANNED_PLAYERS = 10000000
-OUTPUT_FILE = 'new_processed_matches.csv'
-num_matches_to_pull = 5000
+OUTPUT_FILE = 'processed_match_data.csv'
+num_matches_to_pull = 20000
 
 # Load seed data and convert to a DataFrame
 

@@ -8,19 +8,18 @@ GBM with no extra attributes added for initial testing
 """
 
 import pandas as pd
-import sklearn
-import os
-import data_mining.data_constants as dc
-import models.train_model
+import sklearn.ensemble
 
-TRAIN_SET = 'data/raw/init_matches_3_3_2018.csv'
+import data_mining.data_constants as dc
+
+TRAIN_SET = '../../data/raw/init_matches_3_3_2018.csv'
 
 # Load dataset
 train = pd.read_csv(TRAIN_SET)
-attributes_for_modeling = dc.get
+attributes_for_modeling = dc.getTeamsLanesRoles()
 
 # Train model
-sklearn.ensemble.GradientBoostingClassifier().fit(train[])
+sklearn.ensemble.GradientBoostingClassifier().fit(train[attributes_for_modeling], train['team_100_win'])
 
 # Evaluate model
 
