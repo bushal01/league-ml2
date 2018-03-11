@@ -32,14 +32,13 @@ dotenv_path = os.path.join(project_dir, '.env')
 dotenv.load_dotenv(dotenv_path)
 MAX_UNSCANNED_PLAYERS = 10000000
 OUTPUT_FILE = 'processed_match_data.csv'
-desired_run_time = 60 * 1 # in seconds
+desired_run_time = float(input("Enter desired run time in hours: ")) * 3600 # in seconds
 #num_matches_to_pull = 20000 # Program used to pull specified num of matches, now is run-time based
 
 # Load seed data and convert to a DataFrame
 with open(os.getenv('MINED_DATA_DIR') + 'matches1.json', 'r') as f:
     match1_data = json.load(f)
 match1_data = pd.DataFrame(match1_data['matches'])
-#print(match1_data.keys())
 
 # extract initial list of players
 scanned_players = mc.csvToDict(os.getenv('MINED_DATA_DIR') + 'scanned_players.csv')
@@ -81,10 +80,7 @@ while(time.time() - start_time < desired_run_time):
         print('Run time: ' + time.strftime('%H:%M:%S', time.gmtime(time.time() - start_time)))
         if time.time() - start_time > desired_run_time:
             break
-        #if(matches_pulled_ctr >= num_matches_to_pull):
-        #    break
 
-#compiled_pm_dfs = compile_processed_match_dfs(match_dfs)
 compiled_pm_dfs = pd.concat(match_dfs, ignore_index = True)
 pref_column_order = ['match_id','game_version','queue_id','game_duration','team_100_win','100_TOP_SOLO','100_JUNGLE_NONE','100_MIDDLE_SOLO','100_BOTTOM_DUO_CARRY','100_BOTTOM_DUO_SUPPORT','200_TOP_SOLO','200_JUNGLE_NONE','200_MIDDLE_SOLO','200_BOTTOM_DUO_CARRY','200_BOTTOM_DUO_SUPPORT']
 compiled_pm_dfs = compiled_pm_dfs[pref_column_order]
@@ -101,12 +97,3 @@ mc.dictToCsv(scanned_players, os.getenv('MINED_DATA_DIR') + 'scanned_players.csv
 mc.dictToCsv(unscanned_players, os.getenv('MINED_DATA_DIR') + 'unscanned_players.csv')
 mc.dictToCsv(scanned_matches, os.getenv('MINED_DATA_DIR') + 'scanned_matches.csv')
 mc.dictToCsv(unscanned_matches, os.getenv('MINED_DATA_DIR') + 'unscanned_matches.csv')
-
-    
-    #{'message': 'Rate limit exceeded', 'status_code': 429}
-    # 
-    # (optional) load list of player ids
-    # (optional) load list of match ids
-    # (optional, might supercede above) load MatchCrawler object
-    # 
-      
