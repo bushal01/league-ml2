@@ -17,6 +17,13 @@ import datetime
 import requests
 import time
 import os.path
+import os
+import dotenv
+
+
+project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+dotenv_path = os.path.join(project_dir, '.env')
+dotenv.load_dotenv(dotenv_path)
 
 def extractPlayers(match_df, scanned, unscanned):
     """ Goes through each row in the match_df, pulls out all the currentAccountId
@@ -48,7 +55,8 @@ def extractMatchIds(match_history, scanned, unscanned, num_matches_to_pull = 10)
 
 def pullMatchHistory(player_id, region = 'na1'):
     print('Pulling match history for player ' + str(player_id))
-    url = 'https://' + region + '.api.riotgames.com/lol/match/v3/matchlists/by-account/' + str(player_id) + '?api_key=' + dc.getApiKey()
+    url = ('https://' + region + '.api.riotgames.com/lol/match/v3/matchlists/by-account/' + str(player_id)
+           + '?api_key=' + os.getenv('API_KEY'))
     r = requests.get(url)
     if dc.checkRateLimiting(r.json()):
         time.sleep(120)
@@ -57,7 +65,8 @@ def pullMatchHistory(player_id, region = 'na1'):
 
 def pullMatchData(match_id, region = 'na1'):
     print('Pulling match ' + str(match_id))
-    url = 'https://' + region + '.api.riotgames.com/lol/match/v3/matches/' + str(match_id) + '?api_key=' + dc.getApiKey()
+    url = ('https://' + region + '.api.riotgames.com/lol/match/v3/matches/' + str(match_id)
+           + '?api_key=' + os.getenv('API_KEY'))
     r = requests.get(url)
     if dc.checkRateLimiting(r.json()):
         time.sleep(120)

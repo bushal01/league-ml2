@@ -15,15 +15,20 @@ import pandas as pd
 import json
 import requests
 import time
-#import os
+import os
+import dotenv
 
-DATA_DIR = '../../data/mined_data/'
-API_KEY_FILE = '../../data/api_key.txt'
 
-def getApiKey():
-	with open (API_KEY_FILE, "r") as myfile:
-		data=myfile.readlines()[0]
-	return(data)
+project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+dotenv_path = os.path.join(project_dir, '.env')
+dotenv.load_dotenv(dotenv_path)
+#os.getenv('MINED_DATA_DIR') = '../../data/mined_data/'
+#API_KEY_FILE = '../../data/api_key.txt'
+
+#def getApiKey():
+#	with open (API_KEY_FILE, "r") as myfile:
+#		data=myfile.readlines()[0]
+#	return(data)
 
 def getTeams():
     teams = ['100','200']
@@ -82,7 +87,7 @@ def getChampIds():
     This is initially a dictionary with one key: data
     Inside data is a dictionary where every key is the champ
     name, and the rows are the id, key, name, and title"""
-    with open(DATA_DIR + 'champions.json', 'r') as f:
+    with open(os.getenv('MINED_DATA_DIR') + 'champions.json', 'r') as f:
         champ_data_init = json.load(f)
     
     # Pull out the single key dictionary    
@@ -134,7 +139,7 @@ def updateChampList(region = 'na1'):
     if checkRateLimiting(r.json()):
         time.sleep(120)
         r = requests.get(url)
-    with open(DATA_DIR + 'champions.json', 'w') as outfile:
+    with open(os.getenv('MINED_DATA_DIR') + 'champions.json', 'w') as outfile:
         json.dump(r.json(), outfile)
     
 #    url = 'https://' + region + '.api.riotgames.com/lol/match/v3/matches/' + str(match_id) + '?api_key=' + dc.API_KEY

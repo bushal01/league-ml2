@@ -14,6 +14,7 @@ in preparation for Machine Learning applications
 import pandas as pd
 import data_constants as dc
 
+
 def isExtractableMatch(unprocessed_match):
     necessary_keys = ['gameId','queueId','gameVersion','gameDuration','participants']
     for i in necessary_keys:

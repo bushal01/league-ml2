@@ -7,17 +7,13 @@ Main script that builds the DataFrame to hold processed match data
 @author: Albert
 """
 import pandas as pd
-import os
 import json
 import numpy as np
-import data_constants as dc
 import process_match as pm
 import match_crawler as mc
-import importlib
+import os
 import time
-#importlib.reload(dc)
-#importlib.reload(pm)
-#importlib.reload(mc)
+import dotenv
 
 """ For the initial run
 - load seed data
@@ -31,34 +27,37 @@ while loop
     - pull a player's match history from the player ID list
     - repeat
 """
+project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+dotenv_path = os.path.join(project_dir, '.env')
+dotenv.load_dotenv(dotenv_path)
 MAX_UNSCANNED_PLAYERS = 10000000
 OUTPUT_FILE = 'processed_match_data.csv'
-desired_run_time = 60 * 5 # in seconds
+desired_run_time = 60 * 1 # in seconds
 #num_matches_to_pull = 20000 # Program used to pull specified num of matches, now is run-time based
 
 # Load seed data and convert to a DataFrame
-
-with open(dc.DATA_DIR + 'matches1.json', 'r') as f:
+with open(os.getenv('MINED_DATA_DIR') + 'matches1.json', 'r') as f:
     match1_data = json.load(f)
 match1_data = pd.DataFrame(match1_data['matches'])
 #print(match1_data.keys())
 
 # extract initial list of players
-scanned_players = mc.csvToDict(dc.DATA_DIR + 'scanned_players.csv')
-unscanned_players = mc.csvToDict(dc.DATA_DIR + 'unscanned_players.csv')
+scanned_players = mc.csvToDict(os.getenv('MINED_DATA_DIR') + 'scanned_players.csv')
+unscanned_players = mc.csvToDict(os.getenv('MINED_DATA_DIR') + 'unscanned_players.csv')
 if unscanned_players == {}:
     mc.extractPlayers(match1_data,scanned_players,unscanned_players)
 
 # set up initial match_id_lists
-scanned_matches = mc.csvToDict(dc.DATA_DIR + 'scanned_matches.csv')
-unscanned_matches = mc.csvToDict(dc.DATA_DIR + 'unscanned_matches.csv')
+scanned_matches = mc.csvToDict(os.getenv('MINED_DATA_DIR') + 'scanned_matches.csv')
+unscanned_matches = mc.csvToDict(os.getenv('MINED_DATA_DIR') + 'unscanned_matches.csv')
     
 match_dfs = []
 # Scan all unscanned players and extract their matches
 # ** Still need to do a 'season' filter so I don't pull too old matches **
 # Desired number of matches to pull
 matches_pulled_ctr = 0
-while(matches_pulled_ctr < num_matches_to_pull):
+start_time = time.time()
+while(time.time() - start_time < desired_run_time):
     unscanned_playerids = list(unscanned_players.keys())
     for player_id in unscanned_playerids: # loop through unscanned player ids
         print(player_id)
@@ -79,6 +78,7 @@ while(matches_pulled_ctr < num_matches_to_pull):
             match_dfs.append(processed_match_df)
         print('Number of players scanned ' + str(len(scanned_players)))
         print('Number of matches pulled ' + str(matches_pulled_ctr))
+        print('Run time: ' + time.strftime('%H:%M:%S', time.gmtime(time.time() - start_time)))
         if time.time() - start_time > desired_run_time:
             break
         #if(matches_pulled_ctr >= num_matches_to_pull):
@@ -92,15 +92,15 @@ int_cols = ['queue_id','game_duration','team_100_win']
 compiled_pm_dfs[int_cols] = compiled_pm_dfs[int_cols].astype(int)
 int64_cols = ['match_id']
 compiled_pm_dfs[int64_cols] = compiled_pm_dfs[int64_cols].astype(np.int64)
-if os.path.exists(dc.DATA_DIR + OUTPUT_FILE):
-    compiled_pm_dfs.to_csv(dc.DATA_DIR + OUTPUT_FILE, index = False, mode = 'a', header = False)
+if os.path.exists(os.getenv('MINED_DATA_DIR') + OUTPUT_FILE):
+    compiled_pm_dfs.to_csv(os.getenv('MINED_DATA_DIR') + OUTPUT_FILE, index = False, mode = 'a', header = False)
 else:
-    compiled_pm_dfs.to_csv(dc.DATA_DIR + OUTPUT_FILE, index = False)
+    compiled_pm_dfs.to_csv(os.getenv('MINED_DATA_DIR') + OUTPUT_FILE, index = False)
 
-mc.dictToCsv(scanned_players, dc.DATA_DIR + 'scanned_players.csv')
-mc.dictToCsv(unscanned_players, dc.DATA_DIR + 'unscanned_players.csv')
-mc.dictToCsv(scanned_matches, dc.DATA_DIR + 'scanned_matches.csv')
-mc.dictToCsv(unscanned_matches, dc.DATA_DIR + 'unscanned_matches.csv')
+mc.dictToCsv(scanned_players, os.getenv('MINED_DATA_DIR') + 'scanned_players.csv')
+mc.dictToCsv(unscanned_players, os.getenv('MINED_DATA_DIR') + 'unscanned_players.csv')
+mc.dictToCsv(scanned_matches, os.getenv('MINED_DATA_DIR') + 'scanned_matches.csv')
+mc.dictToCsv(unscanned_matches, os.getenv('MINED_DATA_DIR') + 'unscanned_matches.csv')
 
     
     #{'message': 'Rate limit exceeded', 'status_code': 429}
