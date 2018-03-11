@@ -14,9 +14,10 @@ import data_constants as dc
 import process_match as pm
 import match_crawler as mc
 import importlib
-importlib.reload(dc)
-importlib.reload(pm)
-importlib.reload(mc)
+import time
+#importlib.reload(dc)
+#importlib.reload(pm)
+#importlib.reload(mc)
 
 """ For the initial run
 - load seed data
@@ -32,7 +33,8 @@ while loop
 """
 MAX_UNSCANNED_PLAYERS = 10000000
 OUTPUT_FILE = 'processed_match_data.csv'
-num_matches_to_pull = 20000
+desired_run_time = 60 * 5 # in seconds
+#num_matches_to_pull = 20000 # Program used to pull specified num of matches, now is run-time based
 
 # Load seed data and convert to a DataFrame
 
@@ -67,7 +69,7 @@ while(matches_pulled_ctr < num_matches_to_pull):
         mc.extractMatchIds(match_hist, scanned_matches, unscanned_matches) # add the new match ids to the match_id_dict
         raw_match_data = mc.scanMatches(scanned_matches, unscanned_matches)
         raw_match_data = raw_match_data.dropna(thresh = raw_match_data.shape[1] - 1)
-        if(len(unscanned_players) < MAX_UNSCANNED_PLAYERS):
+        if len(unscanned_players) < MAX_UNSCANNED_PLAYERS:
             mc.extractPlayers(raw_match_data,scanned_players,unscanned_players)
         print(len(unscanned_players))
         # scan all the new matches
@@ -77,8 +79,10 @@ while(matches_pulled_ctr < num_matches_to_pull):
             match_dfs.append(processed_match_df)
         print('Number of players scanned ' + str(len(scanned_players)))
         print('Number of matches pulled ' + str(matches_pulled_ctr))
-        if(matches_pulled_ctr >= num_matches_to_pull):
+        if time.time() - start_time > desired_run_time:
             break
+        #if(matches_pulled_ctr >= num_matches_to_pull):
+        #    break
 
 #compiled_pm_dfs = compile_processed_match_dfs(match_dfs)
 compiled_pm_dfs = pd.concat(match_dfs, ignore_index = True)

@@ -3,9 +3,13 @@ import pandas as pd
 import data_mining.data_constants as dc
 
 
-def get_champ_win_rate(champ, matches_df):
-    """ Calculates the win rate of a single champion """
+def get_champ_win_rate(matches_df, champ, lane = 'all'):
+    """ Calculates the win rate of a single champion.
+     By default, looks in every lane.  lane can also
+     be specified (eg. TOP_SOLO) """
     teams_lanes_roles = dc.getTeamsLanesRoles()
+    if lane != 'all':
+        teams_lanes_roles = ['100_' + lane, '200_' + lane]
     num_wins = 0
     tot_appearances = 0
     for lane in teams_lanes_roles:
@@ -22,7 +26,7 @@ def get_champ_win_rate(champ, matches_df):
 
 
 def get_all_champ_win_rate(matches_df):
-    """ Returns a DataFrame of each champion and their associated win rate """
+    """ Returns a DataFrame of each champion and their associated win rate for each lane """
     champs = dc.getChampsFourLetters()
     win_rate_dict = {}
     for i in champs:

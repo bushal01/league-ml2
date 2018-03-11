@@ -116,11 +116,11 @@ for(i in 1:nrow(param_df)) {
                      nrow(validation))
   print(results_df[i,])
   # Write results as well as gbm parameters to a file with append = true to save a running tally of what ive done before
-    write.csv(results_df[i,], '../../data/model_performance/gbm1_noattributes_75k.csv', 
+    write.table(results_df, '../../data/model_performance/gbm1_noattributes_75k.csv', sep = ',', 
               quote = FALSE, row.names = FALSE, col.names = (i == 1), append = TRUE)
 }
-#write.csv(results_df, '../../data/model_performance/gbm1_noattributes_75k.csv', 
-#          quote = FALSE, row.names = FALSE)
+write.csv(results_df, '../../data/model_performance/gbm1_noattributes_75k.csv', 
+          quote = FALSE, row.names = FALSE)
 
 for(i in c('inter_dpth','shrink','bag_fr','cv_fo','n.trees','best.iter','ks_valid')) {
   results_df[[i]] = as.numeric(results_df[[i]])
