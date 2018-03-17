@@ -15,9 +15,11 @@ library(dplyr)
 #### Load training set ####
 setwd("C:/Users/Albert/Desktop/Programming/league-ml2/src/models")
 source('../model_evaluation/model_performance_functions.R')
-ALL_MATCHES = '../../data/raw/matches_100k_3_10_2018.csv'
+ALL_MATCHES = '../../data/raw/matches_160k_3_17_2018.csv'
 all_data = fread(ALL_MATCHES, data.table = FALSE)
-
+RESULTS_OUTPUT = '../../data/model_performance/gbm1_noattributes_160k.csv'
+PARAMS_LM_OUT = '../../data/model_performance/gbm1_noattributes_160k_parameter_sig.txt'
+  
 #### Preprocess to prep for input to GBM ####
 # Specify attributes to use in model, slim the training set,
 # rename attributes (100_ is not valid), and convert to factors
@@ -62,11 +64,18 @@ validation = all_data[!(1:nrow(all_data) %in% train_recs),]
 basic_formula = substr(basic_formula, 1, nchar(basic_formula) - 3)
 basic_formula = as.formula(basic_formula)
 
-interaction_depth = c(1,2,4,6,8,10)
-shrinkage_rate = c(.1, .05, .01)
-bag_fraction = c(.3, .6, .9)
-cv_folds = c(2,5)
+#interaction_depth = c(1,2,4,6,8,10)
+#shrinkage_rate = c(.1, .05, .01)
+#bag_fraction = c(.3, .6, .9)
+#cv_folds = c(2,5)
+#num_trees = c(1000)
+
+interaction_depth = c(2)
+shrinkage_rate = c(.05)
+bag_fraction = c(.6)
+cv_folds = c(5)
 num_trees = c(1000)
+
 
 param_df = setNames(expand.grid(interaction_depth, shrinkage_rate, bag_fraction, cv_folds,num_trees),
                     c('interaction_depth','shrinkage_rate','bag_fraction','cv_folds','num_trees'))
@@ -103,7 +112,8 @@ for(i in 1:nrow(param_df)) {
   auc_valid = rank_comparison_auc(validation$team_100_win, valid_pred)
   end_time = Sys.time()
   total_time = end_time - start_time
-  results_df[i,] = c(as.numeric(param_df[i,]), 
+  cur_row = nrow(results_df)+1
+  results_df[cur_row,] = c(as.numeric(param_df[i,]), 
                      best.iter, 
                      ks_gini_train[1:2], 
                      ks_gini_valid[1:2],
@@ -114,18 +124,20 @@ for(i in 1:nrow(param_df)) {
                      total_time,
                      nrow(train),
                      nrow(validation))
-  print(results_df[i,])
+  print(results_df)
   # Write results as well as gbm parameters to a file with append = true to save a running tally of what ive done before
-    write.table(results_df, '../../data/model_performance/gbm1_noattributes_75k.csv', sep = ',', 
+    write.table(results_df[cur_row,], RESULTS_OUTPUT, sep = ',', 
               quote = FALSE, row.names = FALSE, col.names = (i == 1), append = TRUE)
 }
-write.csv(results_df, '../../data/model_performance/gbm1_noattributes_75k.csv', 
-          quote = FALSE, row.names = FALSE)
+#write.csv(results_df, '../../data/model_performance/gbm1_noattributes_75k.csv', 
+#          quote = FALSE, row.names = FALSE)
 
 for(i in c('inter_dpth','shrink','bag_fr','cv_fo','n.trees','best.iter','ks_valid')) {
   results_df[[i]] = as.numeric(results_df[[i]])
 }
 
 lm_results_analysis = lm(ks_valid ~ inter_dpth + shrink +	bag_fr + cv_fo + n.trees + best.iter, results_df)
+sink(PARAMS_LM_OUT)
 print(summary(lm_results_analysis))
+sink()
 # higher bag fraction, lower inter depth, lower shrinkage

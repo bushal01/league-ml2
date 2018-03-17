@@ -30,13 +30,13 @@ dotenv.load_dotenv(dotenv_path)
 #		data=myfile.readlines()[0]
 #	return(data)
 
-def getTeams():
+def get_teams():
     teams = ['100','200']
     teams_colors = ['BLUE','RED']
     teams_dict = dict(zip(teams, teams_colors))
     return(teams_dict)
 
-def getValidQueueIds():
+def get_valid_queue_ids(():
     # 400 - 5v5 SR Draft Pick
     # 420 - 5v5 SR Ranked Solo Q
     # 430 - 5v5 SR Blind Pick 
@@ -44,21 +44,21 @@ def getValidQueueIds():
     five_v_five_sr = [400, 420, 440]
     return(five_v_five_sr)
 
-def getLanesPositions():
+def get_lanes_positions():
     return(['TOP_SOLO','MIDDLE_SOLO','BOTTOM_DUO_CARRY','BOTTOM_DUO_SUPPORT','JUNGLE_NONE'])
 
-def getTraditionalPositions():
+def get_traditional_positions():
     return(['DUO_CARRY','DUO_SUPPORT','NONE','SOLO','SOLO'])
 
-def getTeamsLanesRolesChamps():
-    teams = getTeams().keys()
-    positions = getLanesPositions()
+def get_teams_lanes_roles_champs():
+    teams = get_teams().keys()
+    positions = get_lanes_positions()
     team_positions = []
     for i in teams:
         for j in positions:
             team_positions.append(i+'_'+j)
             
-    champ_ids = list(getChampIds().keys())
+    champ_ids = list(get_champ_ids().keys())
     champ_ids.sort()
     team_positions_champions = []
     for i in team_positions:
@@ -66,23 +66,23 @@ def getTeamsLanesRolesChamps():
             team_positions_champions.append(i + '_' + str(j))
     return(team_positions_champions)
 
-def getTeamsLanesRoles():
-    teams = getTeams().keys()
-    positions = getLanesPositions()
+def get_teams_lanes_roles():
+    teams = get_teams().keys()
+    positions = get_lanes_positions()
     team_positions = []
     for i in teams:
         for j in positions:
             team_positions.append(i+'_'+j)
     return(team_positions)
 
-def getMatchDataCols():
+def get_match_data_cols():
     game_cols = ['match_id','queue_id','game_version','game_duration','team_100_win']
-    teams_lanes_roles = getTeamsLanesRoles()
+    teams_lanes_roles = get_teams_lanes_roles()
     return game_cols + teams_lanes_roles
-    #champ_cols = getTeamsLanesRolesChamps()    
+    #champ_cols = get_teams_lanes_roles_champs()    
     #return game_cols + champ_cols
 
-def getChampIds():
+def get_champ_ids():
     """ Read in champions data to get champion IDs and names
     This is initially a dictionary with one key: data
     Inside data is a dictionary where every key is the champ
@@ -105,19 +105,19 @@ def getChampIds():
     champ_id_dict = dict(zip(champ_ids, champ_names))
     return(champ_id_dict)
 
-def getChampsFourLetters():
-    champ_id_dict = getChampIds()
+def get_champs_four_letters(():
+    champ_id_dict = get_champ_ids()
     champs = pd.Series(list(champ_id_dict.values()))
     champs = champs.str.slice(0,4)
     return(champs)
 
-def getSmite():
+def get_smite():
     return(11)
 
-def getHeal():
+def get_heal():
     return(7)
 
-def getBarrier():
+def get_barrier():
     return(21)
 
 def checkRateLimiting(request):

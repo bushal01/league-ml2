@@ -15,11 +15,11 @@ import pandas as pd
 import data_constants as dc
 
 
-def isExtractableMatch(unprocessed_match):
+def is_extractable_match(unprocessed_match):
     necessary_keys = ['gameId','queueId','gameVersion','gameDuration','participants']
     for i in necessary_keys:
         if i not in unprocessed_match.keys():
-            print('isExtractableMatch(): necessary_key not found n unprocessed_match.keys()')
+            print('is_extractable_match(): necessary_key not found n unprocessed_match.keys()')
             print(i)
             return(False)
         
@@ -42,7 +42,7 @@ def isExtractableMatch(unprocessed_match):
 
     return(True)
 
-def extractMatch(unprocessed_match):
+def extract_match(unprocessed_match):
     """ Take in the json data and extract match ID, positions, champions,
     summoner spells
     This function might be significantly changed if I create a match class.
@@ -74,18 +74,18 @@ def extractMatch(unprocessed_match):
             'team_100_win':team_100_win,
             'participants':participants})            
 
-def isValidMatch(match):
+def is_valid_match(match):
     """ Verify 5v5 SR
     Verify patch
     Verify Ranked? Don't do this initially -- maybe segment on ranked later
     """
-    valid_qids = dc.getValidQueueIds()
+    valid_qids = dc.get_valid_queue_ids(()
     if match['queue_id'] in valid_qids:
         return(True)
     else:
         return(False)
     
-def isValidTeamComp(match):
+def is_valid_team_comp(match):
     """ Verify whether team comp is a valid one
     ie. solo top, solo mid, jungle, bot supp, bot carry
     """
@@ -105,19 +105,19 @@ def isValidTeamComp(match):
     else:
         return(False)
     
-def isFixableTeamComp(match):
+def is_fixable_team_comp(match):
     """ If team comp is not seen as valid, see if it's fixable.
     As of 9/29, this will simply be a check that jungler 
     was misclassified.  It will simply check to see if there was one smite
     on each team
     """
-    match = fixTeamComp(match)
-    if isValidTeamComp(match):
+    match = fix_team_comp(match)
+    if is_valid_team_comp(match):
         return True
     else:
         return False
             
-def fixTeamComp(match):
+def fix_team_comp(match):
     """ Scenario 1: Jungler camps a lane and gets classified as being in that lane.
         Solution 1: Check for smite.  Reassign that plyaer to jungle.  To correct
         the solo laners, if lane == 'MIDDLE' or lane == 'TOP' reassign role to
@@ -130,7 +130,7 @@ def fixTeamComp(match):
         Solution 3: Check for HEAL or BARRIER.  That player gets DUO_CARRY, other
         gets DUO_SUPPORT.
     """
-    smite = dc.getSmite()
+    smite = dc.get_smite()
     lanes = []
     for player in match['participants']:
         lanes.append(match['participants'][player]['lane'])
@@ -177,20 +177,20 @@ def fixTeamComp(match):
         if match['participants'][player]['lane'] == 'BOTTOM' and match['participants'][player]['role'] == 'SOLO':
             match['participants'][player]['role'] = 'DUO'
         if match['participants'][player]['role'] == 'DUO':
-            if (match['participants'][player]['spell1Id'] in [dc.getHeal(),dc.getBarrier()] or match['participants'][player]['spell2Id'] in [dc.getHeal(),dc.getBarrier()]):
+            if (match['participants'][player]['spell1Id'] in [dc.get_heal(),dc.getBarrier()] or match['participants'][player]['spell2Id'] in [dc.get_heal(),dc.getBarrier()]):
                 match['participants'][player]['role'] = 'DUO_CARRY'
             else:
                 match['participants'][player]['role'] = 'DUO_SUPPORT'
     
     return(match)
             
-def processValidTeamComp(match):
+def process_valid_team_comp(match):
     """ Function will take in a match record, and then extract the relevant
     information, and then re-organize it so it can be easily added
     as a record in our DataFrame -- get the teamId_champId_lane_role and
     team_100_win variables
     """
-    champ_dict = dc.getChampIds()
+    champ_dict = dc.get_champ_ids()
     processed_match = {'match_id':[match['match_id']],
                        'queue_id':[match['queue_id']],
                        'game_version':[match['game_version']],
@@ -201,10 +201,6 @@ def processValidTeamComp(match):
         if match['participants'][i]['championId'] not in champ_dict.keys():
             dc.updateChampList()
         processed_match[match_col] = [champ_dict[match['participants'][i]['championId']][0:4]]
-        #processed_match.append(str(match['participants'][i]['teamId']) + '_' + 
-        #                       str(match['participants'][i]['lane']) + '_' + 
-        #                       str(match['participants'][i]['role']) + '_' + 
-        #                       str(match['participants'][i]['championId']))
     return(processed_match)
 
 def build_processed_match_df(raw_match_data):
@@ -212,39 +208,21 @@ def build_processed_match_df(raw_match_data):
     raw_match_data = raw_match_data.loc[:,match_cols_to_keep]
     
     processed_match_df = pd.DataFrame(index = range(0,raw_match_data.shape[0]),
-                                      columns = dc.getMatchDataCols())
+                                      columns = dc.get_match_data_cols())
     
     for row_num, unprocessed_match in raw_match_data.iterrows():
-        #print(row_num)
-        #print(unprocessed_match)
-        if not isExtractableMatch(unprocessed_match):
-            #print('not extractable')
+        if not is_extractable_match(unprocessed_match):
             continue
-        processed_match = extractMatch(unprocessed_match)
-        if not isValidMatch(processed_match):
+        processed_match = extract_match(unprocessed_match)
+        if not is_valid_match(processed_match):
             continue
-        if not isValidTeamComp(processed_match):
-            if not isFixableTeamComp(processed_match):
+        if not is_valid_team_comp(processed_match):
+            if not is_fixable_team_comp(processed_match):
                 continue
-            processed_match = fixTeamComp(processed_match)
-        processed_match = processValidTeamComp(processed_match)
+            processed_match = fix_team_comp(processed_match)
+        processed_match = process_valid_team_comp(processed_match)
         processed_match_df = processed_match_df.append(pd.DataFrame(processed_match), ignore_index = True)
-#        processed_match_df.iloc[row_num].loc['match_id'] = processed_match[0]
-#        processed_match_df.iloc[row_num].loc['queue_id'] = processed_match[1]
-#        processed_match_df.iloc[row_num].loc['game_version'] = processed_match[2]
-#        processed_match_df.iloc[row_num].loc['game_duration'] = processed_match[3]
-#        processed_match_df.iloc[row_num].loc['team_100_win'] = processed_match[4]
-#        processed_match_df.iloc[row_num].loc[processed_match[5]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[6]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[7]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[8]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[9]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[10]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[11]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[12]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[13]] = 1
-#        processed_match_df.iloc[row_num].loc[processed_match[14]] = 1
-#                               
+
     processed_match_df = processed_match_df.fillna(0)
     processed_match_df = processed_match_df[processed_match_df['game_duration'] != 0]
     return(processed_match_df)
@@ -259,7 +237,7 @@ def compile_processed_match_dfs(match_dfs):
         row_end_indexes.append(total_rows - 1)
     
     compiled_dfs = pd.DataFrame(index = range(0,total_rows),
-                                      columns = dc.getMatchDataCols())
+                                      columns = dc.get_match_data_cols())
     
     for i in range(0,len(match_dfs)):
         compiled_dfs.iloc[row_start_indexes[i]:row_end_indexes[i],:] = match_dfs[i]
