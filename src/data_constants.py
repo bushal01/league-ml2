@@ -19,16 +19,14 @@ import os
 import dotenv
 
 
-project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+project_dir = os.path.join(os.path.dirname(__file__), os.pardir)
 dotenv_path = os.path.join(project_dir, '.env')
 dotenv.load_dotenv(dotenv_path)
-#os.getenv('MINED_DATA_DIR') = '../../data/mined_data/'
-#API_KEY_FILE = '../../data/api_key.txt'
+# '../data/mined_data/'
 
-#def getApiKey():
-#	with open (API_KEY_FILE, "r") as myfile:
-#		data=myfile.readlines()[0]
-#	return(data)
+
+def get_raw_data():
+    return pd.read_csv(os.getenv('MINED_DATA_DIR') + 'processed_match_data.csv')
 
 def get_teams():
     teams = ['100','200']
@@ -36,7 +34,7 @@ def get_teams():
     teams_dict = dict(zip(teams, teams_colors))
     return(teams_dict)
 
-def get_valid_queue_ids(():
+def get_valid_queue_ids():
     # 400 - 5v5 SR Draft Pick
     # 420 - 5v5 SR Ranked Solo Q
     # 430 - 5v5 SR Blind Pick 
@@ -105,7 +103,7 @@ def get_champ_ids():
     champ_id_dict = dict(zip(champ_ids, champ_names))
     return(champ_id_dict)
 
-def get_champs_four_letters(():
+def get_champs_four_letters():
     champ_id_dict = get_champ_ids()
     champs = pd.Series(list(champ_id_dict.values()))
     champs = champs.str.slice(0,4)
@@ -120,7 +118,7 @@ def get_heal():
 def get_barrier():
     return(21)
 
-def checkRateLimiting(request):
+def check_rate_limiting(request):
     '''print(request)'''
     if 'status' in request.keys():
         if request['status']['status_code'] == 429:
@@ -132,14 +130,12 @@ def checkRateLimiting(request):
     else:
         return(False)
 
-def updateChampList(region = 'na1'):
+def update_champ_list(region = 'na1'):
     print('Updating Champ List')
-    url = 'https://' + region + '.api.riotgames.com/lol/static-data/v3/champions/' + '?api_key=' + getApiKey()
+    url = 'https://' + region + '.api.riotgames.com/lol/static-data/v3/champions/' + '?api_key=' + os.getenv('API_KEY')
     r = requests.get(url)
-    if checkRateLimiting(r.json()):
+    if check_rate_limiting(r.json()):
         time.sleep(120)
         r = requests.get(url)
     with open(os.getenv('MINED_DATA_DIR') + 'champions.json', 'w') as outfile:
         json.dump(r.json(), outfile)
-    
-#    url = 'https://' + region + '.api.riotgames.com/lol/match/v3/matches/' + str(match_id) + '?api_key=' + dc.API_KEY

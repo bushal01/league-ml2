@@ -1,13 +1,15 @@
 import numpy as np
 import pandas as pd
-import data_mining.data_constants as dc
+import data_constants as dc
 
 
-def get_champ_win_rate(matches_df, champ, lane = 'all'):
-    """ Calculates the win rate of a single champion.
-     By default, looks in every lane.  lane can also
-     be specified (eg. TOP_SOLO) """
-    teams_lanes_roles = dc.getTeamsLanesRoles()
+def champ_win_rate(matches_df, champ, lane='all'):
+    """Calculate the win rate of a single champion.
+
+     By default, looks in every lane.  Lane can also
+     be specified (eg. TOP_SOLO)
+     """
+    teams_lanes_roles = dc.get_teams_lanes_roles()
     if lane != 'all':
         teams_lanes_roles = ['100_' + lane, '200_' + lane]
     num_wins = 0
@@ -20,23 +22,36 @@ def get_champ_win_rate(matches_df, champ, lane = 'all'):
         else:
             num_wins = num_wins + (np.sum(1 - matches_df['team_100_win'][appearances]))
     if tot_appearances < 1:
-        return [np.nan, tot_appearances]
+        return [0, tot_appearances]
     else:
         return {'win_rate': num_wins / tot_appearances, 'games_played': tot_appearances}
 
 
-def get_all_champ_win_rate(matches_df):
-    """ Returns a DataFrame of each champion and their associated win rate for each lane """
-    champs = dc.getChampsFourLetters()
-    win_rate_dict = {}
-    for i in champs:
-        win_rate_dict[i] = get_champ_win_rate(i, matches_df)['win_rate']
-    win_rate_df = pd.DataFrame(win_rate_dict)
+def all_champ_win_rates(matches_df, lane='all'):
+    """Create a DataFrame of each champion and their win rate in a particular lane."""
+    champs = dc.get_champs_four_letters()
+    win_rate_df = pd.DataFrame({'win_rate':[],'games_played':[]})
+    #win_rate_dict = {}
+    for champ in champs:
+        temp = champ_win_rate(matches_df, champ, lane=lane)
+        win_rate_df.loc[champ]['win_rate'] = temp['win_rate']
+        win_rate_df.loc[champ]['games_played'] = temp['games_played']
+#        temp         win_rate_dict[champ] = champ_win_rate(matches_df, champ, lane=lane)['win_rate']
+#    win_rate_df = pd.Series(win_rate_dict)
     return win_rate_df
+
+def all_champ_all_lanes_win_rates(matches_df):
+    df = pd.DataFrame()
+    lanes = dc.get_lanes_positions()
+    for lane in lanes:
+        df[lane] = all_champ_win_rates(matches_df, lane=lane)
+    return df
 
 
 def paired_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):
-    """ Returns the win rate of this champion pair """
+    """Calculate the win rate of a specified pair of champions on the same team.
+
+    Returns a dict with two keys: 'win_rate' and 'appearances' """
     blue_appearances = matches_df[np.logical_and(matches_df['100_' + lane1] == lane1_champ,
                                                  matches_df['100_' + lane2] == lane2_champ)]
     red_appearances = matches_df[np.logical_and(matches_df['200_' + lane1] == lane1_champ,
@@ -47,7 +62,7 @@ def paired_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):
     blue_wins = np.sum(blue_appearances['team_100_win'])
     red_wins = np.sum(1 - red_appearances['team_100_win'])
     tot_wins = blue_wins + red_wins
-    return {'win_rate': tot_wins / tot_appearanaces, 'occurences': tot_appearanaces}
+    return {'win_rate': tot_wins / tot_appearanaces, 'appearances': tot_appearanaces}
 
 
 def h2h_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):

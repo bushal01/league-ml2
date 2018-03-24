@@ -2,20 +2,24 @@
 """
 Created on Mon Sep  4 16:15:42 2017
 
-@author: Albert Bush
+process_match.py
 
-process_data.py
+Module to check match validity and to format valid matches.
+Checking pulled match validity consists of validating returned data,
+validating type of match (5v5 SR), and validating team/lane composition.
+Formatting valid matches consists of extracting relevant info from JSON
+data and formatting it in an ingestable way for modeling/attribute creation.
 
-Script to read in JSON LoL match data 
-and convert it to a more useful DataFrame format
-in preparation for Machine Learning applications
-
+@author: bushal01
 """
 import pandas as pd
 import data_constants as dc
 
 
 def is_extractable_match(unprocessed_match):
+    '''
+    Checks that JSON data has match data by looking for certain keys
+    '''
     necessary_keys = ['gameId','queueId','gameVersion','gameDuration','participants']
     for i in necessary_keys:
         if i not in unprocessed_match.keys():
@@ -43,11 +47,9 @@ def is_extractable_match(unprocessed_match):
     return(True)
 
 def extract_match(unprocessed_match):
-    """ Take in the json data and extract match ID, positions, champions,
-    summoner spells
-    This function might be significantly changed if I create a match class.
-    It will then be made into a method that creates an instance of the
-    match class
+    """
+    Take in the JSON data and extract match ID, positions, champions,
+    summoner spells.
     """
     match_id = unprocessed_match['gameId']
     queue_id = unprocessed_match['queueId']
@@ -75,18 +77,19 @@ def extract_match(unprocessed_match):
             'participants':participants})            
 
 def is_valid_match(match):
-    """ Verify 5v5 SR
-    Verify patch
-    Verify Ranked? Don't do this initially -- maybe segment on ranked later
     """
-    valid_qids = dc.get_valid_queue_ids(()
+    Verify 5v5 SR
+    Verify Ranked or Draft mode
+    """
+    valid_qids = dc.get_valid_queue_ids()
     if match['queue_id'] in valid_qids:
         return(True)
     else:
         return(False)
     
 def is_valid_team_comp(match):
-    """ Verify whether team comp is a valid one
+    """
+    Verify whether team comp is a valid one
     ie. solo top, solo mid, jungle, bot supp, bot carry
     """
     traditional_positions = ['BOTTOM_DUO_CARRY','BOTTOM_DUO_CARRY',
@@ -106,10 +109,9 @@ def is_valid_team_comp(match):
         return(False)
     
 def is_fixable_team_comp(match):
-    """ If team comp is not seen as valid, see if it's fixable.
-    As of 9/29, this will simply be a check that jungler 
-    was misclassified.  It will simply check to see if there was one smite
-    on each team
+    """
+    If team comp is not seen as valid, see if it's fixable by attempting to
+    fix it and seeing if fix attempt worked.
     """
     match = fix_team_comp(match)
     if is_valid_team_comp(match):
@@ -118,17 +120,19 @@ def is_fixable_team_comp(match):
         return False
             
 def fix_team_comp(match):
-    """ Scenario 1: Jungler camps a lane and gets classified as being in that lane.
-        Solution 1: Check for smite.  Reassign that plyaer to jungle.  To correct
-        the solo laners, if lane == 'MIDDLE' or lane == 'TOP' reassign role to
-        'SOLO'.
+    """
+    Scenario 1: Jungler camps a lane and gets classified as being in that lane.
+    Solution 1: Check for smite.  Reassign that player to jungle.  To correct
+                the solo laners, if lane == 'MIDDLE' or lane == 'TOP' reassign role to
+                'SOLO'.
         
-        Scenario 2: Support/ADC roams and gets classified as jungler.
-        Solution 2: Check JUNGLE roles to see if no smite.  If found, assign both
-        BOTTOM laners to DUO and pass to Scenario 3.
-        Scenario 3: Unable to distinguish between DUO_CARRY and DUO_SUPPORT.
-        Solution 3: Check for HEAL or BARRIER.  That player gets DUO_CARRY, other
-        gets DUO_SUPPORT.
+    Scenario 2: Support/ADC roams and gets classified as jungler.
+    Solution 2: Check JUNGLE roles to see if no smite.  If found, assign both
+                BOTTOM laners to DUO and pass to Scenario 3.
+
+    Scenario 3: Unable to distinguish between DUO_CARRY and DUO_SUPPORT.
+    Solution 3: Check for HEAL or BARRIER.  That player gets DUO_CARRY, other
+                gets DUO_SUPPORT.
     """
     smite = dc.get_smite()
     lanes = []
@@ -166,7 +170,6 @@ def fix_team_comp(match):
                 match['participants'][player]['role'] = 'SOLO'
     
     # Scenario 2
-    
     for player in match['participants']:
         if match['participants'][player]['lane'] == 'JUNGLE' and match['participants'][player]['spell1Id'] != smite and match['participants'][player]['spell2Id'] != smite:
             match['participants'][player]['lane'] = missing_lane
@@ -185,8 +188,10 @@ def fix_team_comp(match):
     return(match)
             
 def process_valid_team_comp(match):
-    """ Function will take in a match record, and then extract the relevant
-    information, and then re-organize it so it can be easily added
+    """
+    Function will take in a match record, and then extract the matchId,
+    queueId, game_version, game duration, and whether or not blue team won.
+    Then re-organize this information so it can be easily added
     as a record in our DataFrame -- get the teamId_champId_lane_role and
     team_100_win variables
     """
@@ -199,11 +204,14 @@ def process_valid_team_comp(match):
     for i in match['participants']:
         match_col = str(match['participants'][i]['teamId']) + '_' + str(match['participants'][i]['lane']) + '_' + str(match['participants'][i]['role'])
         if match['participants'][i]['championId'] not in champ_dict.keys():
-            dc.updateChampList()
+            dc.update_champ_list()
         processed_match[match_col] = [champ_dict[match['participants'][i]['championId']][0:4]]
     return(processed_match)
 
 def build_processed_match_df(raw_match_data):
+    '''
+    Formats valid matches into a pd.DataFrame
+    '''
     match_cols_to_keep = ['gameDuration','gameId','gameVersion','participants','platformId','queueId','teams']
     raw_match_data = raw_match_data.loc[:,match_cols_to_keep]
     
@@ -223,23 +231,6 @@ def build_processed_match_df(raw_match_data):
         processed_match = process_valid_team_comp(processed_match)
         processed_match_df = processed_match_df.append(pd.DataFrame(processed_match), ignore_index = True)
 
-    processed_match_df = processed_match_df.fillna(0)
+    processed_match_df = processed_match_df.dropna(axis=0, how='any')
     processed_match_df = processed_match_df[processed_match_df['game_duration'] != 0]
     return(processed_match_df)
-
-def compile_processed_match_dfs(match_dfs):
-    total_rows = 0
-    row_start_indexes = []
-    row_end_indexes = []
-    for i in match_dfs:
-        row_start_indexes.append(total_rows)
-        total_rows = total_rows + i.shape[0]
-        row_end_indexes.append(total_rows - 1)
-    
-    compiled_dfs = pd.DataFrame(index = range(0,total_rows),
-                                      columns = dc.get_match_data_cols())
-    
-    for i in range(0,len(match_dfs)):
-        compiled_dfs.iloc[row_start_indexes[i]:row_end_indexes[i],:] = match_dfs[i]
-        
-    return(compiled_dfs)

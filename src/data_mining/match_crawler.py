@@ -2,6 +2,8 @@
 """
 Created on Tue Nov 21 19:34:18 2017
 
+match_crawler.py
+
 Module to assist in crawling through matches and player histories
 1. Functions that pull match histories and match data
 2. Functions that extract playerIds and matchIds from matches
@@ -56,7 +58,7 @@ def pull_match_history(player_id, region = 'na1'):
     url = ('https://' + region + '.api.riotgames.com/lol/match/v3/matchlists/by-account/' + str(player_id)
            + '?api_key=' + os.getenv('API_KEY'))
     r = requests.get(url)
-    if dc.checkRateLimiting(r.json()):
+    if dc.check_rate_limiting(r.json()):
         time.sleep(120)
         r = requests.get(url)
     return(r.json())
@@ -66,7 +68,7 @@ def pull_match_data(match_id, region = 'na1'):
     url = ('https://' + region + '.api.riotgames.com/lol/match/v3/matches/' + str(match_id)
            + '?api_key=' + os.getenv('API_KEY'))
     r = requests.get(url)
-    if dc.checkRateLimiting(r.json()):
+    if dc.check_rate_limiting(r.json()):
         time.sleep(120)
         r = requests.get(url)
     return(r.json())    

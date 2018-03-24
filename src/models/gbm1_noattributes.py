@@ -10,7 +10,7 @@ GBM with no extra attributes added for initial testing
 import pandas as pd
 import sklearn.ensemble
 
-import data_mining.data_constants as dc
+import data_constants as dc
 
 TRAIN_SET = '../../data/raw/init_matches_3_3_2018.csv'
 
