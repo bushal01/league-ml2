@@ -15,10 +15,10 @@ library(dplyr)
 #### Load training set ####
 setwd("C:/Users/Albert/Desktop/Programming/league-ml2/src/models")
 source('../model_evaluation/model_performance_functions.R')
-ALL_MATCHES = '../../data/raw/matches_160k_3_17_2018.csv'
+ALL_MATCHES = '../../data/raw/matches_230k_3_24_2018.csv'
 all_data = fread(ALL_MATCHES, data.table = FALSE)
-RESULTS_OUTPUT = '../../data/model_performance/gbm1_noattributes_160k.csv'
-PARAMS_LM_OUT = '../../data/model_performance/gbm1_noattributes_160k_parameter_sig.txt'
+RESULTS_OUTPUT = '../../data/model_performance/gbm1_noattributes_230k.csv'
+PARAMS_LM_OUT = '../../data/model_performance/gbm1_noattributes_230k_parameter_sig.txt'
   
 #### Preprocess to prep for input to GBM ####
 # Specify attributes to use in model, slim the training set,
@@ -72,7 +72,7 @@ basic_formula = as.formula(basic_formula)
 
 interaction_depth = c(2)
 shrinkage_rate = c(.05)
-bag_fraction = c(.6)
+bag_fraction = c(1.0)
 cv_folds = c(5)
 num_trees = c(1000)
 
