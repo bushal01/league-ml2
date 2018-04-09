@@ -6,7 +6,7 @@ Data constants and setup
  - Set up dictionary of team ID to team color
  - Set up dictionary of summoner spell IDs - spell names
  - Set up dictionary of champ IDs - champ names
- - Set up list of traditional team comp positions
+ - Set up list of traditional team comp roles
 
 @author: Albert Bush
 """
@@ -42,36 +42,36 @@ def get_valid_queue_ids():
     five_v_five_sr = [400, 420, 440]
     return(five_v_five_sr)
 
-def get_lanes_positions():
+def get_lanes_roles():
     return(['TOP_SOLO','MIDDLE_SOLO','BOTTOM_DUO_CARRY','BOTTOM_DUO_SUPPORT','JUNGLE_NONE'])
 
-def get_traditional_positions():
+def get_traditional_roles():
     return(['DUO_CARRY','DUO_SUPPORT','NONE','SOLO','SOLO'])
 
 def get_teams_lanes_roles_champs():
     teams = get_teams().keys()
-    positions = get_lanes_positions()
-    team_positions = []
+    roles = get_lanes_roles()
+    team_roles = []
     for i in teams:
-        for j in positions:
-            team_positions.append(i+'_'+j)
+        for j in roles:
+            team_roles.append(i+'_'+j)
             
     champ_ids = list(get_champ_ids().keys())
     champ_ids.sort()
-    team_positions_champions = []
-    for i in team_positions:
+    team_roles_champions = []
+    for i in team_roles:
         for j in champ_ids:
-            team_positions_champions.append(i + '_' + str(j))
-    return(team_positions_champions)
+            team_roles_champions.append(i + '_' + str(j))
+    return(team_roles_champions)
 
 def get_teams_lanes_roles():
     teams = get_teams().keys()
-    positions = get_lanes_positions()
-    team_positions = []
+    roles = get_lanes_roles()
+    team_roles = []
     for i in teams:
-        for j in positions:
-            team_positions.append(i+'_'+j)
-    return(team_positions)
+        for j in roles:
+            team_roles.append(i+'_'+j)
+    return(team_roles)
 
 def get_match_data_cols():
     game_cols = ['match_id','queue_id','game_version','game_duration','team_100_win']

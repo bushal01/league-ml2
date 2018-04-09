@@ -48,7 +48,7 @@ def is_extractable_match(unprocessed_match):
 
 def extract_match(unprocessed_match):
     """
-    Take in the JSON data and extract match ID, positions, champions,
+    Take in the JSON data and extract match ID, roles, champions,
     summoner spells.
     """
     match_id = unprocessed_match['gameId']
@@ -92,18 +92,18 @@ def is_valid_team_comp(match):
     Verify whether team comp is a valid one
     ie. solo top, solo mid, jungle, bot supp, bot carry
     """
-    traditional_positions = ['BOTTOM_DUO_CARRY','BOTTOM_DUO_CARRY',
+    traditional_roles = ['BOTTOM_DUO_CARRY','BOTTOM_DUO_CARRY',
                  'BOTTOM_DUO_SUPPORT','BOTTOM_DUO_SUPPORT',
                  'JUNGLE_NONE','JUNGLE_NONE',
                  'MIDDLE_SOLO','MIDDLE_SOLO',
                  'TOP_SOLO','TOP_SOLO']
-    positions = []
+    roles = []
     for player in match['participants']:
-        positions.append(match['participants'][player]['lane'] + '_' + 
+        roles.append(match['participants'][player]['lane'] + '_' + 
                          match['participants'][player]['role'])
     
-    positions.sort()
-    if(positions == traditional_positions):
+    roles.sort()
+    if(roles == traditional_roles):
         return(True)
     else:
         return(False)

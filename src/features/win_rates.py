@@ -120,10 +120,11 @@ def all_h2h_pairs_fixed_lane(matches_df, lane1, lane2):
     win_rate_df = pd.DataFrame({'win_rate': [], 'games_played': []})
     for champ1 in champs:
         for champ2 in champs:
-            print(champ1 + '_beats_' + champ2)
-            temp = h2h_win_rate(matches_df, lane1, lane2, champ1, champ2)
-            temp = pd.DataFrame(temp, index=[champ1 + '_' + champ2])
-            win_rate_df = win_rate_df.append(temp)
+            if champ1 != champ2:
+                #print(champ1 + '_beats_' + champ2)
+                temp = h2h_win_rate(matches_df, lane1, lane2, champ1, champ2)
+                temp = pd.DataFrame(temp, index=[champ1 + '_' + champ2])
+                win_rate_df = win_rate_df.append(temp)
     return win_rate_df
 
 
@@ -133,6 +134,7 @@ def all_h2h_pairs_all_lanes(matches_df, file_name=''):
     df = pd.DataFrame()
     lanes = dc.get_lanes_positions()
     for lane1 in lanes:
+        print(lane1)
         for lane2 in lanes:
             print(lane1 + '_' + lane2)
             temp = all_h2h_pairs_fixed_lane(matches_df, lane1, lane2)
@@ -141,4 +143,10 @@ def all_h2h_pairs_all_lanes(matches_df, file_name=''):
     if file_name != '':
         df.to_csv(file_name)
     return df
+
+
+def win_rate_significance(win_rate, games_played, threshold):
+    modified_win_rate = win_rate
+    modified_win_rate[games_played < threshold] = 0
+    return modified_win_rate
 
