@@ -1,0 +1,54 @@
+Stage 1: Build the dataset
+
+0) Data Constants
+ - Set up dictionary of champ IDs - champ names
+ - Set up dictionary of summoner spell IDs - spell names
+ - Set up dictionary of team ID to team color
+ - Set up list of traditional team comp positions
+
+1) Crawl through player's match data
+ A. Build initial list of players
+ - Initialize player set.  This will be a dict that will either be empty (upon initial run) or filled with players scanned. Keys will be currentAccountId. Values will be last date that player's match history was scanned and that player's currentPlatformId.  Initial seed of players will come from Riot's preset match data.
+ B. Build list of matches
+ - For each player in dict, scan their match history to build 2 dicts of matchIds. The first dict will be 'already scanned matches' (initially empty).  The second dict will be 'unscanned matches.' The keys will be matchId and the value will be the match timestamp and the scan date (for the scanned matches).
+ C. Pull match data from matches
+ - Initialize a match DataFrame for each matchId in the unscanned match dict.
+ - Scan each match in the unscanned match list, process it, add it to the match DataFrame, and then move it to the scanned match list with appropriate match date and remove it from the unscanned match list.
+
+ - Initialize match set (1m record empty list)
+ - Initialize match DataFrame (500,000 x 1500 empty DataFrame)
+   - Every champion x every position x every team (red/blue), blue win               indicator, match ID = columns
+ - While loop that does the following (end condition should be some user    entered input or until match or player set becomes large enough):
+  - Request a player's match list
+  - Take all matches not in match set and process match data record by record       and add to dataset
+  - Report data in a DF and/or to console (# players/matches in player/match     set, # records in DF, iteration #)
+
+1a) What's going to be in memory at any given time?
+ - List of player IDs
+ - List of match IDs
+ - List of matches to process
+ - DataFrame of processed matches (write this to a CSV and purge after it hits a certain size?)
+
+
+2) Process match data
+ - Verify match is 5v5 SR, maybe verify ranked, maybe verify patch
+ - Extract each player's champion, position, team, and summoner spell
+ - Determine 
+
+3) Finalize dataset, split into training, validation, and test sets.
+
+Stage 2: Apply machine learning algorithms
+
+4) Initially apply learning algorithms on test set
+
+5) In depth EDA -- analyze each variable (counts, over represented team comps), analyze different segmentations (natural ways to group certain team comps? early game comps, late game comps, segment based on rank, region, etc...)
+
+6) Run second, more intricate round of learning algorithms -- run on test and validation.  Look at learning charts.  Decide which algorithms have best potential; decide if we have enough data or need to mine more.
+
+7) Fine tune the final 1-3 chosen algorithms.  Create final statistics, analysis, and charts.  Compare algorithms, look at precision, recall, etc...
+
+Stage 3: Create usable product
+
+8) Create script that takes in partial team comp, possible champ choices for remaining positions, and returns best choices with expected win %.
+
+9) Create version that rates a team composition in a vacuum.  Modify it to take in potential champ choices in each position and give top rated comps.

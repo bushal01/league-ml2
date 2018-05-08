@@ -68,7 +68,7 @@ def record_gbm_performance(description='', learning_rate='', max_depth='', n_est
                          correct_pred_validation, ks_train, ks_valid, gini_train, gini_valid, mse_train, mse_valid,
                          train_time]
     if os.path.isfile(file):
-        results.to_csv(file, mode='a')
+        results.to_csv(file, mode='a', header=False)
     else:
         results.to_csv(file, mode='w')
     return results

@@ -26,7 +26,7 @@ dotenv_path = os.path.join(project_dir, '.env')
 dotenv.load_dotenv(dotenv_path)
 
 def extract_players(match_df, scanned, unscanned):
-    """ Goes through each row in the match_df, pulls out all the currentAccountId
+    """Goes through each row in the match_df, pulls out all the currentAccountId
     and currentPlatformId in each match, DF that will store summoner IDs, 
     platform (NA/EUW,etc, whether that summoner's match history has been 
     crawled, and the last crawl date)
@@ -43,6 +43,7 @@ def extract_players(match_df, scanned, unscanned):
     print(str(player_ctr) + " new summoner IDs added to the list")
         
 def extract_match_ids(match_history, scanned, unscanned, num_matches_to_pull = 10):
+    """Goes through a player's match history and extracts num_matches_to_pull gameId that are not in scanned."""
     if num_matches_to_pull == 'max':
         num_matches_to_pull = len(match_history['matches'])
     matches = pd.DataFrame(match_history['matches'])

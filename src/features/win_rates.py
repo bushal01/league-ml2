@@ -39,7 +39,7 @@ def all_champ_win_rates(matches_df, lane='all'):
 
 def all_champ_all_lanes_win_rates(matches_df, file_name=''):
     df = pd.DataFrame()
-    lanes = dc.get_lanes_positions()
+    lanes = dc.get_lanes_roles()
     for lane in lanes:
         temp = all_champ_win_rates(matches_df, lane=lane)
         df[lane + '_win_rate'] = temp['win_rate']
@@ -83,7 +83,7 @@ def all_champ_pairs_fixed_lane(matches_df, lane1, lane2):
 
 def all_champ_pairs_all_lanes(matches_df, file_name=''):
     df = pd.DataFrame()
-    lanes = dc.get_lanes_positions()
+    lanes = dc.get_lanes_roles()
     for lane1 in lanes:
         for lane2 in lanes:
             if lane1 != lane2:
@@ -132,7 +132,7 @@ def all_h2h_pairs_all_lanes(matches_df, file_name=''):
     """Produces all head to head win rates for all lane matchups -- even across different lanes
     (eg. TOP_SOLO Renekton vs MID_SOLO Xerath)."""
     df = pd.DataFrame()
-    lanes = dc.get_lanes_positions()
+    lanes = dc.get_lanes_roles()
     for lane1 in lanes:
         print(lane1)
         for lane2 in lanes:

@@ -28,8 +28,6 @@ MAX_UNSCANNED_PLAYERS = 10000000  # To prevent too large of a playerId file
 OUTPUT_FILE = 'processed_match_data.csv'
 desired_run_time = float(input("Enter desired run time in hours: ")) * 3600  # convert to seconds
 
-# Load seed data and convert to a DataFrame
-
 # Load CSV of scanned and unscanned playerIds and convert to dictionary
 # If no such files exist, uses seed data supplied from Riot to get an initial player base to scan
 # Note: file existence is checked inside mc.csv_to_dict()

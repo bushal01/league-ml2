@@ -103,10 +103,13 @@ def get_champ_ids():
     champ_id_dict = dict(zip(champ_ids, champ_names))
     return(champ_id_dict)
 
-def get_champs_four_letters():
+def get_champs_four_letters(to_csv=False, champ_file='champs.csv'):
     champ_id_dict = get_champ_ids()
     champs = pd.Series(list(champ_id_dict.values()))
     champs = champs.str.slice(0,4)
+    if to_csv:
+        champs.to_csv(champ_file)
+
     return(champs)
 
 def get_smite():

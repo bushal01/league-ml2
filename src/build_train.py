@@ -8,8 +8,7 @@ Build the training set as well as wrapper functions to get the training/valid/te
 """
 
 import pandas as pd
-import numpy as np
-import dotenv
+import os
 import sys
 import features.win_rates as wr
 import data_constants as dc
@@ -23,26 +22,36 @@ validation_file = '../data/processed/validation.csv'
 test_file = '../data/processed/test.csv'
 
 
-def build_win_rates(indiv_win_rates=True, paired_win_rates=True, h2h_win_rates=True):
+def build_win_rates(df, indiv_win_rates=True, paired_win_rates=True, h2h_win_rates=True):
     if indiv_win_rates:
-        wr.all_champ_all_lanes_win_rates(raw_data, indiv_win_rate_file)
+        wr.all_champ_all_lanes_win_rates(df, indiv_win_rate_file)
     if paired_win_rates:
-        wr.all_champ_pairs_all_lanes(raw_data, paired_win_rate_file)
+        wr.all_champ_pairs_all_lanes(df, paired_win_rate_file)
     if h2h_win_rates:
-        wr.all_h2h_pairs_all_lanes(raw_data, h2h_win_rate_file)
+        wr.all_h2h_pairs_all_lanes(df, h2h_win_rate_file)
 
 
 def main():
     # Load match data
     data = pd.read_csv(os.getenv('MINED_DATA_DIR') + 'processed_match_data.csv')
 
+    # Train, validation, test split
+    train = data.sample(int(.6 * data.shape[0]), random_state=410)
+    validation = data[~data['match_id'].isin(train['match_id'])].sample(int(.2 * data.shape[0]), random_state=411)
+    test = data[~data['match_id'].isin(pd.concat([train['match_id'],
+                                                  validation['match_id']], axis=0, ignore_index=True))]
+
     # Build win rates (optional)
     if len(sys.argv) > 1:
         indiv_wr_boolean = sys.argv[1]
+        print('Fire 1')
         if len(sys.argv) > 2:
             paired_wr_boolean = sys.argv[2]
+            print('Fire 2')
             if len(sys.argv) > 3:
                 h2h_wr_boolean = sys.argv[3]
+                print('Fire 3')
+    build_win_rates(train, indiv_wr_boolean, paired_wr_boolean, h2h_wr_boolean)
 
     # Load win rates
     indiv_win_rates = pd.read_csv(indiv_win_rate_file)
@@ -104,18 +113,15 @@ def main():
 #                 '200_TOP_SOLO', '200_JUNGLE_NONE', '200_MIDDLE_SOLO', '200_BOTTOM_DUO_CARRY', '200_BOTTOM_DUO_SUPPORT']
 
 #    data = data.drop(cols_drop)
-
-    # Train, validation, test split
-    train = data.sample(int(.6 * data.shape[0]), random_state=410)
-    validation = data[~data['match_id'].isin(train['match_id'])].sample(int(.2 * data.shape[0]), random_state=411)
-    test = data[~data['match_id'].isin(pd.concat([train['match_id'],
-                                                  validation['match_id']], axis=0, ignore_index=True))]
+    train = data[data['match_id'].isin(train['match_id'])]
+    validation = data[data['match_id'].isin(validation['match_id'])]
+    test = data[data['match_id'].isin(test['match_id'])]
 
     train.to_csv(train_file)
     validation.to_csv(validation_file)
     test.to_csv(test_file)
 
-if __name__ == 'main':
+if __name__ == '__main__':
     # sys.argv[i] are booleans where
     # sys.argv[1] = build individual win rates
     # sys.argv[2] = build paired win rates

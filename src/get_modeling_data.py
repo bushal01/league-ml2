@@ -1,9 +1,14 @@
 import pandas as pd
+import dotenv
+import os
 
-train_file = '../data/processed/train.csv'
-validation_file = '../data/processed/validation.csv'
-test_file = '../data/processed/test.csv'
-
+project_dir = os.path.join(os.path.dirname(__file__), os.pardir)
+dotenv_path = os.path.join(project_dir, '.env')
+dotenv.load_dotenv(dotenv_path)
+train_file = os.getenv('DATA_DIR') + 'processed\\train.csv'
+validation_file = os.getenv('DATA_DIR') + 'processed\\validation.csv'
+test_file = os.getenv('DATA_DIR') + 'processed\\test.csv'
+all_data_file = os.getenv('MINED_DATA_DIR') + 'processed_match_data.csv'
 
 def get_train():
     train = pd.read_csv(train_file, index_col=[0])
@@ -19,6 +24,10 @@ def get_test():
     test = pd.read_csv(test_file, index_col=[0])
     return test
 
+
+def get_all_data():
+    data = pd.read_csv(all_data_file)
+    return data
 
 def get_non_modeling_cols():
     return ['match_id', 'game_version', 'queue_id', 'game_duration',
