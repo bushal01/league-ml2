@@ -1,14 +1,16 @@
 import pandas as pd
 import sklearn.ensemble
-import get_modeling_data
-import model_evaluation.model_performance_functions as mpf
-import time
-import dotenv
+import sys
 import os
-
+import dotenv
 project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
 dotenv_path = os.path.join(project_dir, '.env')
 dotenv.load_dotenv(dotenv_path)
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+import get_modeling_data
+import model_evaluation.model_performance_functions as mpf
+import time
+
 
 train = get_modeling_data.get_train()
 validation = get_modeling_data.get_validation()
