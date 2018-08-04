@@ -50,7 +50,8 @@ def all_champ_all_lanes_win_rates(matches_df, file_name=''):
 
 
 def paired_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):
-    """Calculate the win rate of a specified pair of champions on the same team.
+    """Calculate the win rate of a specified pair of champions on the same team in the same lane
+    without using that game's outcome.
 
     Returns a dict with two keys: 'win_rate' and 'appearances' """
     blue_appearances = matches_df[np.logical_and(matches_df['100_' + lane1] == lane1_champ,
@@ -65,21 +66,25 @@ def paired_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):
     tot_wins = blue_wins + red_wins
 
     if tot_appearanaces < 1:
-        return {'win_rate': 0, 'games_played': 0}
+        return {'win_rate': 0, 'games_played': 0, 'red_apps': 0, 'red_wins': 0, 'blue_apps': 0, 'blue_wins': 0}
     else:
-        return {'win_rate': tot_wins / tot_appearanaces, 'games_played': tot_appearanaces}
+        return {'win_rate': tot_wins / tot_appearanaces, 'games_played': tot_appearanaces,
+                'red_apps': red_appearances.shape[0], 'red_wins': red_wins,
+                'blue_apps': blue_appearances.shape[0], 'blue_wins': blue_wins}
 
 
 def all_champ_pairs_fixed_lane(matches_df, lane1, lane2):
     """Create a DataFrame with every pair of champs as the key and their win rates in lane1 and lane2."""
     champs = dc.get_champs_four_letters()
-    win_rate_df = pd.DataFrame({'win_rate': [], 'games_played': []})
+    win_rate_df = pd.DataFrame({'win_rate': [], 'games_played': [], 'red_apps': [], 'red_wins': [],
+                                'blue_apps': [], 'blue_wins': []})
     for champ1 in champs:
         for champ2 in champs:
             temp = paired_win_rate(matches_df, lane1, lane2, champ1, champ2)
             temp = pd.DataFrame(temp, index=[champ1 + '_' + champ2])
             win_rate_df = win_rate_df.append(temp)
     return win_rate_df
+
 
 def all_champ_pairs_all_lanes(matches_df, file_name=''):
     df = pd.DataFrame()
@@ -89,11 +94,27 @@ def all_champ_pairs_all_lanes(matches_df, file_name=''):
             if lane1 != lane2:
                 print(lane1 + '_' + lane2)
                 temp = all_champ_pairs_fixed_lane(matches_df, lane1, lane2)
-                df[lane1 + '_' + lane2 + '_win_rate'] = temp['win_rate']
-                df[lane1 + '_' + lane2 + '_games_played'] = temp['games_played']
+                df[lane1 + '_' + lane2 + '_wr'] = temp['win_rate']
+                df[lane1 + '_' + lane2 + '_gp'] = temp['games_played'].astype(int)
+                df[lane1 + '_' + lane2 + '_ra'] = temp['red_apps'].astype(int)
+                df[lane1 + '_' + lane2 + '_rw'] = temp['red_wins'].astype(int)
+                df[lane1 + '_' + lane2 + '_ba'] = temp['blue_apps'].astype(int)
+                df[lane1 + '_' + lane2 + '_bw'] = temp['blue_wins'].astype(int)
     if file_name != '':
         df.to_csv(file_name)
     return df
+
+
+def corrected_all_pairs(matches_df, file_name='', wr_file_name='../data/win_rates/all_pairs_all_lanes_w_apps.csv'):
+    lanes = dc.get_lanes_roles()
+    for lane1 in lanes:
+        for lane2 in lanes:
+            if lane1 != lane2:
+                print(lane1 + '_' + lane2)
+                new_wr = []
+                for index, row in matches_df:
+                    new_wr.append()
+
 
 
 def h2h_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):
