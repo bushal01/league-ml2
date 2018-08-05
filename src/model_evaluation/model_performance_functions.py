@@ -18,13 +18,14 @@ def ks_gini(loss, score):
 
     cumsum_score = np.cumsum(df['loss']) / np.sum(df['loss'])
 
-    ks = np.max(np.abs(iden - cumsum_score))
-    gini = np.sum(iden - cumsum_score) / df.shape[0]
+    ks = 2 * np.max(np.abs(iden - cumsum_score))
+    gini = 2 * np.sum(iden - cumsum_score) / df.shape[0]
     return {'ks': ks, 'gini': gini}
 
 
 def gains_chart(loss, score):
     """Show gains chart of binned scores along with KS and Gini."""
+
 
     return
 
