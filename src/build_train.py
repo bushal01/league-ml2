@@ -17,7 +17,7 @@ import data_constants as dc
 
 indiv_win_rate_file = '../data/win_rates/all_champ_all_lanes_win_rates.csv'
 paired_win_rate_file = '../data/win_rates/all_pairs_all_lanes_w_apps.csv'
-h2h_win_rate_file = '../data/win_rates/all_h2h_all_lanes_win_rates.csv'
+h2h_win_rate_file = '../data/win_rates/all_h2h_all_lanes_w_apps.csv'
 train_file = '../data/processed/train_v2.csv'
 validation_file = '../data/processed/validation_v2.csv'
 test_file = '../data/processed/test_v2.csv'
@@ -110,7 +110,8 @@ def main():
             tlr1 = '100' + '_' + lr1
             tlr2 = '200' + '_' + lr2
             data[tlr1 + '_' + tlr2] = data[tlr1].str.cat(data[tlr2], sep='_')
-            data = pd.merge(data, h2h_win_rates[['champ_pair', tlr1[4:] + '_' + tlr2[4:] + '_win_rate']],
+            data = pd.merge(data, h2h_win_rates[['champ_pair', tlr1[4:] + '_' + tlr2[4:] + '_wr',
+                                                 tlr1[4:] + '_' + tlr2[4:] + '_gp']],
                             how='left', left_on=tlr1 + '_' + tlr2, right_on='champ_pair')
             data = data.rename({tlr1[4:] + '_' + tlr2[4:] + '_win_rate': tlr1 + '_' + tlr2 + '_h2h_100_wr'}, axis=1)
             data = data.drop(['champ_pair', tlr1 + '_' + tlr2], axis=1)

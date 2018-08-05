@@ -37,6 +37,7 @@ def all_champ_win_rates(matches_df, lane='all'):
         win_rate_df = win_rate_df.append(temp)
     return win_rate_df
 
+
 def all_champ_all_lanes_win_rates(matches_df, file_name=''):
     df = pd.DataFrame()
     lanes = dc.get_lanes_roles()
@@ -105,18 +106,6 @@ def all_champ_pairs_all_lanes(matches_df, file_name=''):
     return df
 
 
-def corrected_all_pairs(matches_df, file_name='', wr_file_name='../data/win_rates/all_pairs_all_lanes_w_apps.csv'):
-    lanes = dc.get_lanes_roles()
-    for lane1 in lanes:
-        for lane2 in lanes:
-            if lane1 != lane2:
-                print(lane1 + '_' + lane2)
-                new_wr = []
-                for index, row in matches_df:
-                    new_wr.append()
-
-
-
 def h2h_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):
     blue_appearances = matches_df[np.logical_and(matches_df['100_' + lane1] == lane1_champ,
                                                  matches_df['200_' + lane2] == lane2_champ)]
@@ -130,15 +119,15 @@ def h2h_win_rate(matches_df, lane1, lane2, lane1_champ, lane2_champ):
     tot_wins = blue_wins + red_wins
 
     if tot_appearances < 1:
-        return {'win_rate': 0, 'games_played': 0}
+        return {'win_rate': 0, 'games_played': 0, 'wins': 0}
     else:
-        return {'win_rate': tot_wins / tot_appearances, 'games_played': tot_appearances}
+        return {'win_rate': tot_wins / tot_appearances, 'games_played': tot_appearances, 'wins': tot_wins}
 
 
 def all_h2h_pairs_fixed_lane(matches_df, lane1, lane2):
     """Produce all head to head win rates for a fixed lane matchup. """
     champs = dc.get_champs_four_letters()
-    win_rate_df = pd.DataFrame({'win_rate': [], 'games_played': []})
+    win_rate_df = pd.DataFrame({'win_rate': [], 'games_played': [], 'wins': []})
     for champ1 in champs:
         for champ2 in champs:
             if champ1 != champ2:
@@ -159,15 +148,13 @@ def all_h2h_pairs_all_lanes(matches_df, file_name=''):
         for lane2 in lanes:
             print(lane1 + '_' + lane2)
             temp = all_h2h_pairs_fixed_lane(matches_df, lane1, lane2)
-            df[lane1 + '_' + lane2 + '_win_rate'] = temp['win_rate']
-            df[lane1 + '_' + lane2 + '_games_played'] = temp['games_played']
+            df[lane1 + '_' + lane2 + '_wr'] = temp['win_rate']
+            df[lane1 + '_' + lane2 + '_gp'] = temp['games_played']
+            df[lane1 + '_' + lane2 + '_wins'] = temp['wins']
     if file_name != '':
         df.to_csv(file_name)
     return df
 
 
-def win_rate_significance(win_rate, games_played, threshold):
-    modified_win_rate = win_rate
-    modified_win_rate[games_played < threshold] = 0
-    return modified_win_rate
-
+def decayed_win_rate(win_rate, games_played, decay_speed=.3):
+    return win_rate * (1 - np.exp(-(games_played ** decay_speed)))
