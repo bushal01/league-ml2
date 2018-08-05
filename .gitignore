@@ -84,3 +84,9 @@ target/
 # R files
 *.Rhistory
 *.RData
+
+# exclude CSVs
+*.csv
+
+# exclude images
+*.png
