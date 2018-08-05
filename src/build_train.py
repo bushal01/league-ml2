@@ -115,6 +115,14 @@ def main():
             data = data.rename({tlr1[4:] + '_' + tlr2[4:] + '_win_rate': tlr1 + '_' + tlr2 + '_h2h_100_wr'}, axis=1)
             data = data.drop(['champ_pair', tlr1 + '_' + tlr2], axis=1)
 
+    # Drop erroneous rows with '0' as a champ name
+    print(data.shape)
+    lane_cols = ['100_TOP_SOLO', '100_JUNGLE_NONE', '100_MIDDLE_SOLO', '100_BOTTOM_DUO_CARRY', '100_BOTTOM_DUO_SUPPORT',
+                 '200_TOP_SOLO', '200_JUNGLE_NONE', '200_MIDDLE_SOLO', '200_BOTTOM_DUO_CARRY', '200_BOTTOM_DUO_SUPPORT']
+    for col in lane_cols:
+        data = data[data[col] != '0']
+    print(data.shape)
+
     train = data[data['match_id'].isin(train['match_id'])]
     validation = data[data['match_id'].isin(validation['match_id'])]
     test = data[data['match_id'].isin(test['match_id'])]
