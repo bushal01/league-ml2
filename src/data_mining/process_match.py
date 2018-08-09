@@ -13,8 +13,9 @@ data and formatting it in an ingestable way for modeling/attribute creation.
 @author: bushal01
 """
 import pandas as pd
+import sys
+sys.path.append('../')
 import data_constants as dc
-
 
 def is_extractable_match(unprocessed_match):
     '''
@@ -180,7 +181,7 @@ def fix_team_comp(match):
         if match['participants'][player]['lane'] == 'BOTTOM' and match['participants'][player]['role'] == 'SOLO':
             match['participants'][player]['role'] = 'DUO'
         if match['participants'][player]['role'] == 'DUO':
-            if (match['participants'][player]['spell1Id'] in [dc.get_heal(),dc.getBarrier()] or match['participants'][player]['spell2Id'] in [dc.get_heal(),dc.getBarrier()]):
+            if (match['participants'][player]['spell1Id'] in [dc.get_heal(),dc.get_barrier()] or match['participants'][player]['spell2Id'] in [dc.get_heal(),dc.get_barrier()]):
                 match['participants'][player]['role'] = 'DUO_CARRY'
             else:
                 match['participants'][player]['role'] = 'DUO_SUPPORT'
