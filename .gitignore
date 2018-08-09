@@ -90,3 +90,6 @@ target/
 
 # exclude images
 *.png
+*.jpg
+*.jpeg
+*.gif
