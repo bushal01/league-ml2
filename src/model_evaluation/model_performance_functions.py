@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 import dotenv
+import matplotlib.pyplot as plt
 
 
 project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
@@ -18,13 +19,60 @@ def ks_gini(loss, score):
 
     cumsum_score = np.cumsum(df['loss']) / np.sum(df['loss'])
 
-    ks = 2 * np.max(np.abs(iden - cumsum_score))
+    ks = np.max(np.abs(iden - cumsum_score))
     gini = 2 * np.sum(iden - cumsum_score) / df.shape[0]
     return {'ks': ks, 'gini': gini}
 
 
-def gains_chart(loss, score):
+def lorenz_curve(loss_pred, score_pred, loss_valid, score_valid, title='Lorenz Curve'):
+    loss_pred = pd.Series(loss_pred)
+    score_pred = pd.Series(score_pred)
+
+    n = len(loss_pred)
+    df = pd.concat([loss_pred, score_pred], axis=1)
+    df.columns =['loss_pred', 'score_pred']
+    df = df.sort_values(by='score_pred')
+    total_loss_pred = np.sum(df['loss_pred'])
+    cum_loss_pred = np.cumsum(df['loss_pred']) / total_loss_pred
+
+    base_line = np.cumsum(np.ones(n)) / n
+
+    best_line = np.cumsum(df['loss_pred'].sort_values()) / total_loss_pred
+
+    plt.plot(np.arange(n)/n, cum_loss_pred, label='Train')
+    plt.plot(np.arange(n)/n, base_line, label='Base Line')
+    plt.plot(np.arange(n)/n, best_line, label='Perfect Predictions')
+
+    loss_valid = pd.Series(loss_valid)
+    score_valid = pd.Series(score_valid)
+
+    n = len(loss_valid)
+    df = pd.concat([loss_valid, score_valid], axis=1)
+    df.columns =['loss_valid', 'score_valid']
+    df = df.sort_values(by='score_valid')
+    total_loss_valid = np.sum(df['loss_valid'])
+    cum_loss_valid = np.cumsum(df['loss_valid']) / total_loss_valid
+
+    plt.plot(np.arange(n)/n, cum_loss_valid, label='Validation')
+
+    plt.xlabel('% of Records')
+    plt.ylabel('% of Total Actual')
+
+    train_gini = "{:.3f}".format(ks_gini(loss_pred, score_pred)['gini'])
+    valid_gini = "{:.3f}".format(ks_gini(loss_valid, score_valid)['gini'])
+
+    plt.suptitle(title)
+    plt.title('Train gini: ' + train_gini + ', Valid gini: ' + valid_gini)
+    plt.legend(bbox_to_anchor=(1.15, 1), loc=2, borderaxespad=0.)
+    plt.show()
+    plt.close()
+
+
+def gains_chart(loss, score, num_bins=10, title='Gains Chart', return_table=True, include_scores=True):
     """Show gains chart of binned scores along with KS and Gini."""
+    loss = pd.Series(loss)
+
+
 
 
     return
@@ -51,7 +99,7 @@ def best_threshold(loss, score, step_size = .01):
         if current_score > best_score:
             best_score = current_score
             best_thresh = i
-    return {'threshold': best_thresh, 'prediction_rate': best_score}
+    return {'threshold': best_thresh, 'accuracy': best_score}
 
 
 def record_gbm_performance(description='', learning_rate='', max_depth='', n_estimators='', min_samples_split='',
