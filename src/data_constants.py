@@ -142,3 +142,106 @@ def update_champ_list(region = 'na1'):
         r = requests.get(url)
     with open(os.getenv('MINED_DATA_DIR') + 'champions.json', 'w') as outfile:
         json.dump(r.json(), outfile)
+
+
+def get_lane_cols(wr=False, gp=False):
+    lane_cols = ['100_TOP_SOLO', '100_MIDDLE_SOLO', '100_JUNGLE_NONE', '100_BOTTOM_DUO_CARRY',
+                 '100_BOTTOM_DUO_SUPPORT', '200_TOP_SOLO', '200_MIDDLE_SOLO', '200_JUNGLE_NONE',
+                 '200_BOTTOM_DUO_CARRY', '200_BOTTOM_DUO_SUPPORT']
+    lane_cols_wr = [x + '_wr' for x in lane_cols]
+    lane_cols_gp = [x + '_gp' for x in lane_cols]
+    if wr:
+        lane_cols = lane_cols + lane_cols_wr
+    if gp:
+        lane_cols = lane_cols + lane_cols_gp
+    return lane_cols
+
+
+def get_lane_pair_cols(only_wr=False):
+    paired_wr_cols = ['100_TOP_SOLO_MIDDLE_SOLO_wr', '200_TOP_SOLO_MIDDLE_SOLO_wr',
+                      '100_TOP_SOLO_BOTTOM_DUO_CARRY_wr', '200_TOP_SOLO_BOTTOM_DUO_CARRY_wr',
+                      '100_TOP_SOLO_BOTTOM_DUO_SUPPORT_wr', '200_TOP_SOLO_BOTTOM_DUO_SUPPORT_wr',
+                      '100_TOP_SOLO_JUNGLE_NONE_wr', '200_TOP_SOLO_JUNGLE_NONE_wr',
+                      '100_MIDDLE_SOLO_BOTTOM_DUO_CARRY_wr', '200_MIDDLE_SOLO_BOTTOM_DUO_CARRY_wr',
+                      '100_MIDDLE_SOLO_BOTTOM_DUO_SUPPORT_wr', '200_MIDDLE_SOLO_BOTTOM_DUO_SUPPORT_wr',
+                      '100_MIDDLE_SOLO_JUNGLE_NONE_wr', '200_MIDDLE_SOLO_JUNGLE_NONE_wr',
+                      '100_BOTTOM_DUO_CARRY_BOTTOM_DUO_SUPPORT_wr', '200_BOTTOM_DUO_CARRY_BOTTOM_DUO_SUPPORT_wr',
+                      '100_BOTTOM_DUO_CARRY_JUNGLE_NONE_wr', '200_BOTTOM_DUO_CARRY_JUNGLE_NONE_wr',
+                      '100_BOTTOM_DUO_SUPPORT_JUNGLE_NONE_wr', '200_BOTTOM_DUO_SUPPORT_JUNGLE_NONE_wr']
+    if only_wr:
+        return paired_wr_cols
+    else:
+        paired_gp_cols = [x[0:-2] + 'gp' for x in paired_wr_cols]
+        return paired_wr_cols + paired_gp_cols
+
+def get_h2h_cols(only_wr=False):
+    h2h_wr_cols = ['100_TOP_SOLO_200_TOP_SOLO_h2h_100_wr',
+                   '100_TOP_SOLO_200_MIDDLE_SOLO_h2h_100_wr',
+                   '100_TOP_SOLO_200_BOTTOM_DUO_CARRY_h2h_100_wr',
+                   '100_TOP_SOLO_200_BOTTOM_DUO_SUPPORT_h2h_100_wr',
+                   '100_TOP_SOLO_200_JUNGLE_NONE_h2h_100_wr',
+                   '100_MIDDLE_SOLO_200_TOP_SOLO_h2h_100_wr',
+                   '100_MIDDLE_SOLO_200_MIDDLE_SOLO_h2h_100_wr',
+                   '100_MIDDLE_SOLO_200_BOTTOM_DUO_CARRY_h2h_100_wr',
+                   '100_MIDDLE_SOLO_200_BOTTOM_DUO_SUPPORT_h2h_100_wr',
+                   '100_MIDDLE_SOLO_200_JUNGLE_NONE_h2h_100_wr',
+                   '100_BOTTOM_DUO_CARRY_200_TOP_SOLO_h2h_100_wr',
+                   '100_BOTTOM_DUO_CARRY_200_MIDDLE_SOLO_h2h_100_wr',
+                   '100_BOTTOM_DUO_CARRY_200_BOTTOM_DUO_CARRY_h2h_100_wr',
+                   '100_BOTTOM_DUO_CARRY_200_BOTTOM_DUO_SUPPORT_h2h_100_wr',
+                   '100_BOTTOM_DUO_CARRY_200_JUNGLE_NONE_h2h_100_wr',
+                   '100_BOTTOM_DUO_SUPPORT_200_TOP_SOLO_h2h_100_wr',
+                   '100_BOTTOM_DUO_SUPPORT_200_MIDDLE_SOLO_h2h_100_wr',
+                   '100_BOTTOM_DUO_SUPPORT_200_BOTTOM_DUO_CARRY_h2h_100_wr',
+                   '100_BOTTOM_DUO_SUPPORT_200_BOTTOM_DUO_SUPPORT_h2h_100_wr',
+                   '100_BOTTOM_DUO_SUPPORT_200_JUNGLE_NONE_h2h_100_wr',
+                   '100_JUNGLE_NONE_200_TOP_SOLO_h2h_100_wr',
+                   '100_JUNGLE_NONE_200_MIDDLE_SOLO_h2h_100_wr',
+                   '100_JUNGLE_NONE_200_BOTTOM_DUO_CARRY_h2h_100_wr',
+                   '100_JUNGLE_NONE_200_BOTTOM_DUO_SUPPORT_h2h_100_wr',
+                   '100_JUNGLE_NONE_200_JUNGLE_NONE_h2h_100_wr',
+                   '100_TOP_SOLO_MIDDLE_SOLO_wr',
+                   '200_TOP_SOLO_MIDDLE_SOLO_wr',
+                   '100_TOP_SOLO_BOTTOM_DUO_CARRY_wr',
+                   '200_TOP_SOLO_BOTTOM_DUO_CARRY_wr',
+                   '100_TOP_SOLO_BOTTOM_DUO_SUPPORT_wr',
+                   '200_TOP_SOLO_BOTTOM_DUO_SUPPORT_wr',
+                   '100_TOP_SOLO_JUNGLE_NONE_wr',
+                   '200_TOP_SOLO_JUNGLE_NONE_wr',
+                   '100_MIDDLE_SOLO_TOP_SOLO_wr',
+                   '200_MIDDLE_SOLO_TOP_SOLO_wr',
+                   '100_MIDDLE_SOLO_BOTTOM_DUO_CARRY_wr',
+                   '200_MIDDLE_SOLO_BOTTOM_DUO_CARRY_wr',
+                   '100_MIDDLE_SOLO_BOTTOM_DUO_SUPPORT_wr',
+                   '200_MIDDLE_SOLO_BOTTOM_DUO_SUPPORT_wr',
+                   '100_MIDDLE_SOLO_JUNGLE_NONE_wr',
+                   '200_MIDDLE_SOLO_JUNGLE_NONE_wr',
+                   '100_BOTTOM_DUO_CARRY_TOP_SOLO_wr',
+                   '200_BOTTOM_DUO_CARRY_TOP_SOLO_wr',
+                   '100_BOTTOM_DUO_CARRY_MIDDLE_SOLO_wr',
+                   '200_BOTTOM_DUO_CARRY_MIDDLE_SOLO_wr',
+                   '100_BOTTOM_DUO_CARRY_BOTTOM_DUO_SUPPORT_wr',
+                   '200_BOTTOM_DUO_CARRY_BOTTOM_DUO_SUPPORT_wr',
+                   '100_BOTTOM_DUO_CARRY_JUNGLE_NONE_wr',
+                   '200_BOTTOM_DUO_CARRY_JUNGLE_NONE_wr',
+                   '100_BOTTOM_DUO_SUPPORT_TOP_SOLO_wr',
+                   '200_BOTTOM_DUO_SUPPORT_TOP_SOLO_wr',
+                   '100_BOTTOM_DUO_SUPPORT_MIDDLE_SOLO_wr',
+                   '200_BOTTOM_DUO_SUPPORT_MIDDLE_SOLO_wr',
+                   '100_BOTTOM_DUO_SUPPORT_BOTTOM_DUO_CARRY_wr',
+                   '200_BOTTOM_DUO_SUPPORT_BOTTOM_DUO_CARRY_wr',
+                   '100_BOTTOM_DUO_SUPPORT_JUNGLE_NONE_wr',
+                   '200_BOTTOM_DUO_SUPPORT_JUNGLE_NONE_wr',
+                   '100_JUNGLE_NONE_TOP_SOLO_wr',
+                   '200_JUNGLE_NONE_TOP_SOLO_wr',
+                   '100_JUNGLE_NONE_MIDDLE_SOLO_wr',
+                   '200_JUNGLE_NONE_MIDDLE_SOLO_wr',
+                   '100_JUNGLE_NONE_BOTTOM_DUO_CARRY_wr',
+                   '200_JUNGLE_NONE_BOTTOM_DUO_CARRY_wr',
+                   '100_JUNGLE_NONE_BOTTOM_DUO_SUPPORT_wr',
+                   '200_JUNGLE_NONE_BOTTOM_DUO_SUPPORT_wr']
+    if only_wr:
+        return h2h_wr_cols
+    else:
+        h2h_gp_cols = [x[0:-2] + 'gp' for x in h2h_wr_cols]
+        return h2h_wr_cols + h2h_gp_cols

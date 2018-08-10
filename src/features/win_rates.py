@@ -24,13 +24,13 @@ def champ_win_rate(matches_df, champ, lane='all'):
     if tot_appearances < 1:
         return {'win_rate':0, 'games_played':0}
     else:
-        return {'win_rate': num_wins / tot_appearances, 'games_played': tot_appearances}
+        return {'win_rate': num_wins / tot_appearances, 'games_played': tot_appearances, 'wins': num_wins}
 
 
 def all_champ_win_rates(matches_df, lane='all'):
     """Create a DataFrame of each champion and their win rate in a particular lane."""
     champs = dc.get_champs_four_letters()
-    win_rate_df = pd.DataFrame({'win_rate':[],'games_played':[]})
+    win_rate_df = pd.DataFrame({'win_rate': [], 'games_played': [], 'wins': []})
     for champ in champs:
         temp = champ_win_rate(matches_df, champ, lane=lane)
         temp = pd.DataFrame(temp, index=[champ])
@@ -45,6 +45,7 @@ def all_champ_all_lanes_win_rates(matches_df, file_name=''):
         temp = all_champ_win_rates(matches_df, lane=lane)
         df[lane + '_win_rate'] = temp['win_rate']
         df[lane + '_games_played'] = temp['games_played']
+        df[lane + '_wins'] = temp['wins']
     if file_name != '':
         df.to_csv(file_name)
     return df
@@ -157,4 +158,4 @@ def all_h2h_pairs_all_lanes(matches_df, file_name=''):
 
 
 def decayed_win_rate(win_rate, games_played, decay_speed=.3):
-    return win_rate * (1 - np.exp(-(games_played ** decay_speed)))
+    return win_rate * (1 - np.exp(-(games_played * decay_speed))) + .4 * np.exp(-games_played * decay_speed)

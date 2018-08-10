@@ -11,7 +11,7 @@ dotenv.load_dotenv(dotenv_path)
 
 def ks_gini(loss, score):
     """Calculate KS and Gini score"""
-    df = pd.DataFrame({'loss':loss, 'score':score})
+    df = pd.DataFrame({'loss': loss, 'score': score})
     df = df.sort_values(by=['score'])
 
     iden = np.ones(df.shape[0])
@@ -25,12 +25,8 @@ def ks_gini(loss, score):
 
 
 def lorenz_curve(loss_pred, score_pred, loss_valid, score_valid, title='Lorenz Curve'):
-    loss_pred = pd.Series(loss_pred)
-    score_pred = pd.Series(score_pred)
-
     n = len(loss_pred)
-    df = pd.concat([loss_pred, score_pred], axis=1)
-    df.columns =['loss_pred', 'score_pred']
+    df = pd.DataFrame({'loss_pred': loss_pred, 'score_pred': score_pred})
     df = df.sort_values(by='score_pred')
     total_loss_pred = np.sum(df['loss_pred'])
     cum_loss_pred = np.cumsum(df['loss_pred']) / total_loss_pred
@@ -47,8 +43,7 @@ def lorenz_curve(loss_pred, score_pred, loss_valid, score_valid, title='Lorenz C
     score_valid = pd.Series(score_valid)
 
     n = len(loss_valid)
-    df = pd.concat([loss_valid, score_valid], axis=1)
-    df.columns =['loss_valid', 'score_valid']
+    df = pd.DataFrame({'loss_valid': loss_valid, 'score_pred': score_valid})
     df = df.sort_values(by='score_valid')
     total_loss_valid = np.sum(df['loss_valid'])
     cum_loss_valid = np.cumsum(df['loss_valid']) / total_loss_valid
@@ -70,11 +65,72 @@ def lorenz_curve(loss_pred, score_pred, loss_valid, score_valid, title='Lorenz C
 
 def gains_chart(loss, score, num_bins=10, title='Gains Chart', return_table=True, include_scores=True):
     """Show gains chart of binned scores along with KS and Gini."""
-    loss = pd.Series(loss)
+    n = len(loss)
+    df = pd.DataFrame({'loss': loss, 'score': score})
+    df = df.sort_values(by='score')
 
+    # Initialize arrays that store aggregated values
+    bin_scores = np.zeros(num_bins)
+    bin_losses = np.zeros(num_bins)
+    bin_sizes = np.zeros(num_bins)
+    virtual_bins = num_bins
 
+    min_score = np.min(score)
+    max_score = np.max(score)
+    raw_step_size = (max_score - min_score) / num_bins
+    break_start = 0
+    break_end = num_bins
 
+    breaks = np.linspace(min_score, max_score, virtual_bins + 1)
 
+    for i in np.arange(break_start, break_end):
+        bin_scores[i] = np.mean(df['score'][(df['score'] > breaks[i]) & (df['score'] <= breaks[i+1])])
+        bin_losses[i] = np.mean(df['loss'][(df['score'] > breaks[i]) & (df['score'] <= breaks[i+1])])
+        bin_sizes[i] = np.sum((df['score'] > breaks[i]) & (df['score'] <= breaks[i+1]))
+
+    # Convert gains chart table to DataFrame
+    gains_chart_df = pd.DataFrame({'bin': np.arange(1, num_bins + 1),
+                                   'count': bin_sizes,
+                                   'avg_score': bin_scores,
+                                   'avg_loss': bin_losses}, index=np.arange(1, num_bins + 1))
+
+    gains_chart_df = gains_chart_df[['bin', 'count', 'avg_score', 'avg_loss']]
+#    gains_chart_df['rl_avg_loss'] = gains_chart_df['avg_loss'] / np.mean(df['loss'])
+#    gains_chart_df['rl_avg_score'] = gains_chart_df['avg_score'] / np.mean(df['score'])
+
+    gini = ks_gini(loss, score)
+    gini = "{:.3f}".format(gini['gini'])
+
+    if include_scores:
+        chart_min = min(np.min(gains_chart_df['avg_score']), np.min(gains_chart_df['avg_loss'])) - .1
+        chart_max = max(np.max(gains_chart_df['avg_score']), np.max(gains_chart_df['avg_loss'])) + .1
+    else:
+        chart_min = np.min(gains_chart_df['avg_loss']) - .1
+        chart_max = np.max(gains_chart_df['avg_loss']) + .1
+
+    # Create the plot
+    plt.ylim(min(chart_min, 0.0), max(1.0, chart_max))
+    plt.title(title + ', Gini: ' + gini)
+    plt.grid()
+    plt.xticks(np.arange(1,11))
+    plt.plot(gains_chart_df['bin'], gains_chart_df['avg_loss'], zorder=15)
+    plt.scatter(gains_chart_df['bin'], gains_chart_df['avg_loss'], s=15, label='_nolegend_', zorder=14)
+    if include_scores:
+        plt.plot(gains_chart_df['bin'], gains_chart_df['avg_score'], zorder=8)
+        plt.scatter(gains_chart_df['bin'], gains_chart_df['avg_score'], s=15, label='_nolegend', zorder=7)
+    plt.legend(bbox_to_anchor=(1.15, 1), loc=2, borderaxespad=0.)
+    plt.ylabel('Avg Actual')
+    plt.xlabel('Bin')
+    axes2 = plt.twinx()
+    axes2.set_ylabel('Count')
+    axes2.bar(gains_chart_df['bin'], gains_chart_df['count'], zorder=2, color='grey')
+    axes2.set_ylim(0, 3*np.max(gains_chart_df['count']))
+
+    plt.show()
+    plt.close()
+
+    if return_table:
+        return gains_chart_df
     return
 
 

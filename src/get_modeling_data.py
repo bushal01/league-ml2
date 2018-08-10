@@ -5,9 +5,9 @@ import os
 project_dir = os.path.join(os.path.dirname(__file__), os.pardir)
 dotenv_path = os.path.join(project_dir, '.env')
 dotenv.load_dotenv(dotenv_path)
-train_file = os.getenv('DATA_DIR') + 'processed\\train_v2.csv'
-validation_file = os.getenv('DATA_DIR') + 'processed\\validation_v2.csv'
-test_file = os.getenv('DATA_DIR') + 'processed\\test_v2.csv'
+train_file = os.getenv('DATA_DIR') + 'processed\\train_v3.csv'
+validation_file = os.getenv('DATA_DIR') + 'processed\\validation_v3.csv'
+test_file = os.getenv('DATA_DIR') + 'processed\\test_v3.csv'
 all_data_file = os.getenv('MINED_DATA_DIR') + 'processed_match_data.csv'
 
 def get_train():
