@@ -50,7 +50,30 @@ Project Organization
     │
     └── tox.ini            <- tox file with settings for running tox; see tox.testrun.org
 
-
 --------
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+The entrypoint for the code in this project is run_process.py.
+
+run_process.py modes:
+- crawl
+- history
+- train
+- score
+
+### crawl
+To build a dataset of matches, one must query for a summoner's match history.  Using that history, one can then acquire
+more summoner IDs, and continue crawling.
+
+##### Parameters
+- prime_data_dir  # directory of data that has already been crawled
+- summoner_name  # if no prime_data_dir supplied, supply a summoner_name with which to begin the crawl
+- crawl_time  # time in hours to crawl
+
+### history
+Look up a summoner name or encrypted id, and aggregate their history on all champions played
+
+##### Parameters
+- summoner_name  # plaintext of summoner name
+- summoner_id  # encrypted summoner id, will be used over summoner name if available
+- queue  # what type of queue
+- season  # specific season
