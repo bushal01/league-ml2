@@ -56,7 +56,7 @@ def extract_match_ids(match_history, scanned, unscanned, num_matches_to_pull = 1
 
 def pull_match_history(player_id, region = 'na1'):
     print('Pulling match history for player ' + str(player_id))
-    url = ('https://' + region + '.api.riotgames.com/lol/match/v3/matchlists/by-account/' + str(player_id)
+    url = ('https://' + region + '.api.riotgames.com/lol/match/v4/matchlists/by-account/' + str(player_id)
            + '?api_key=' + os.getenv('API_KEY'))
     r = requests.get(url)
     if dc.check_rate_limiting(r.json()):
@@ -66,7 +66,7 @@ def pull_match_history(player_id, region = 'na1'):
 
 def pull_match_data(match_id, region = 'na1'):
     print('Pulling match ' + str(match_id))
-    url = ('https://' + region + '.api.riotgames.com/lol/match/v3/matches/' + str(match_id)
+    url = ('https://' + region + '.api.riotgames.com/lol/match/v4/matches/' + str(match_id)
            + '?api_key=' + os.getenv('API_KEY'))
     r = requests.get(url)
     if dc.check_rate_limiting(r.json()):

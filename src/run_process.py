@@ -1,5 +1,6 @@
 """Point of entry script for all processes -- crawling, training, scoring."""
 
+
 def crawl():
     """Collect already crawled players and matches, and continue crawling.
     params:
@@ -9,6 +10,13 @@ def crawl():
     - scanned_matches_file
     - unscanned_matches_file
     - output_file
+
+    """
+    return
+
+
+def player_summary():
+    """
 
     """
     return

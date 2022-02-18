@@ -31,10 +31,11 @@ desired_run_time = float(input("Enter desired run time in hours: ")) * 3600  # c
 # Load CSV of scanned and unscanned playerIds and convert to dictionary
 # If no such files exist, uses seed data supplied from Riot to get an initial player base to scan
 # Note: file existence is checked inside mc.csv_to_dict()
-scanned_players = mc.csv_to_dict(os.getenv('MINED_DATA_DIR') + 'scanned_players.csv')
+scanned_players = mc.csv_to_dict( os.getenv('MINED_DATA_DIR') + 'scanned_players.csv')
 unscanned_players = mc.csv_to_dict(os.getenv('MINED_DATA_DIR') + 'unscanned_players.csv')
 if unscanned_players == {}:
-    with open(os.getenv('MINED_DATA_DIR') + 'matches1.json', 'r') as f:
+    print(os.getenv('MINED_DATA_DIR'))
+    with open(os.path.join(os.getenv('MINED_DATA_DIR'), 'matches1.json'), 'r') as f:
         match1_data = json.load(f)
     match1_data = pd.DataFrame(match1_data['matches'])
     mc.extract_players(match1_data, scanned_players, unscanned_players)
